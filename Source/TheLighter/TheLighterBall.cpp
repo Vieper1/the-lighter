@@ -9,6 +9,9 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 
+
+
+#pragma region INIT
 ATheLighterBall::ATheLighterBall()
 {
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> BallMesh(TEXT("/Game/Rolling/Meshes/BallMesh.BallMesh"));
@@ -23,7 +26,9 @@ ATheLighterBall::ATheLighterBall()
 	Ball->BodyInstance.MassScale = 3.5f;
 	Ball->BodyInstance.MaxAngularVelocity = 800.0f;
 	Ball->SetNotifyRigidBodyCollision(true);
+	Ball->SetConstraintMode(EDOFMode::YZPlane);
 	RootComponent = Ball;
+
 
 	// Create a camera boom attached to the root (ball)
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
@@ -46,7 +51,6 @@ ATheLighterBall::ATheLighterBall()
 	bCanJump = true; // Start being able to jump
 }
 
-
 void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// set up gameplay key bindings
@@ -55,7 +59,23 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
 }
+#pragma endregion
 
+
+
+#pragma region BEGINPLAY & TICK
+void ATheLighterBall::BeginPlay()
+{
+	Super::BeginPlay();
+}
+void ATheLighterBall::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+}
+#pragma endregion
+
+
+#pragma region INPUT
 void ATheLighterBall::MoveRight(float Val)
 {
 	const FVector Torque = FVector(-1.f * Val * RollTorque, 0.f, 0.f);
@@ -77,10 +97,16 @@ void ATheLighterBall::Jump()
 		bCanJump = false;
 	}
 }
+#pragma endregion
 
+
+
+
+
+#pragma region COLLISION
 void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-
 	bCanJump = true;
 }
+#pragma endregion

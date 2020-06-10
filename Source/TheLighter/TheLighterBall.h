@@ -41,6 +41,12 @@ public:
 
 
 
+#pragma region BEGINPLAY & TICK
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
+#pragma endregion
+
+
 
 
 	
