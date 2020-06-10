@@ -38,6 +38,11 @@ public:
 		bool bDisableMovement;
 #pragma endregion
 
+#pragma region CONFIG
+	UPROPERTY(EditAnywhere, Category = "Mode")
+		UMaterialInterface * BallMaterial;
+#pragma endregion
+
 
 
 

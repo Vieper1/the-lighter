@@ -26,8 +26,12 @@ ATheLighterBall::ATheLighterBall()
 	Ball->BodyInstance.MassScale = 3.5f;
 	Ball->BodyInstance.MaxAngularVelocity = 800.0f;
 	Ball->SetNotifyRigidBodyCollision(true);
-	Ball->SetConstraintMode(EDOFMode::YZPlane);
 	RootComponent = Ball;
+
+	Ball->BodyInstance.bLockXRotation = true;
+	Ball->BodyInstance.bLockZRotation = true;
+	Ball->BodyInstance.bLockXTranslation = true;
+	Ball->SetConstraintMode(EDOFMode::YZPlane);
 
 
 	// Create a camera boom attached to the root (ball)
@@ -35,7 +39,7 @@ ATheLighterBall::ATheLighterBall()
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->bDoCollisionTest = false;
 	SpringArm->SetUsingAbsoluteRotation(true); // Rotation of the ball should not affect rotation of boom
-	SpringArm->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
+	SpringArm->SetRelativeRotation(FRotator(0.f, 0.f, 0.f));
 	SpringArm->TargetArmLength = 1200.f;
 	SpringArm->bEnableCameraLag = false;
 	SpringArm->CameraLagSpeed = 3.f;
@@ -67,6 +71,10 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 void ATheLighterBall::BeginPlay()
 {
 	Super::BeginPlay();
+	if (BallMaterial) Ball->SetMaterial(0, BallMaterial);
+
+	APlayerController * player0 = GetWorld()->GetFirstPlayerController();
+	if (player0) player0->Possess(this);
 }
 void ATheLighterBall::Tick(float DeltaSeconds)
 {
