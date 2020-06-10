@@ -54,10 +54,6 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAxis("MoveForward", this, &ATheLighterBall::MoveForward);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
-
-	// handle touch devices
-	PlayerInputComponent->BindTouch(IE_Pressed, this, &ATheLighterBall::TouchStarted);
-	PlayerInputComponent->BindTouch(IE_Released, this, &ATheLighterBall::TouchStopped);
 }
 
 void ATheLighterBall::MoveRight(float Val)
@@ -87,25 +83,4 @@ void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor*
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 
 	bCanJump = true;
-}
-
-void ATheLighterBall::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	if (bCanJump)
-	{
-		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse);
-		Ball->AddImpulse(Impulse);
-		bCanJump = false;
-	}
-
-}
-
-void ATheLighterBall::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
-{
-	if (bCanJump)
-	{
-		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse);
-		Ball->AddImpulse(Impulse);
-		bCanJump = false;
-	}
 }
