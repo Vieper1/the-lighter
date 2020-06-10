@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
+#include "Components/SpotLightComponent.h"
 
 
 
@@ -28,11 +29,11 @@ ATheLighterBall::ATheLighterBall()
 	Ball->SetNotifyRigidBodyCollision(true);
 	RootComponent = Ball;
 
+	// Constraint
 	Ball->BodyInstance.bLockXRotation = true;
 	Ball->BodyInstance.bLockZRotation = true;
 	Ball->BodyInstance.bLockXTranslation = true;
 	Ball->SetConstraintMode(EDOFMode::YZPlane);
-
 
 	// Create a camera boom attached to the root (ball)
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm0"));
@@ -49,6 +50,12 @@ ATheLighterBall::ATheLighterBall()
 	Camera->SetupAttachment(SpringArm, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = false; // We don't want the controller rotating the camera
 
+	// Spotlight
+	SpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight0"));
+	SpotLight->SetupAttachment(RootComponent);
+	SpotLight->SetRelativeRotation(FRotator(0, 90, 0));
+
+	
 	// Set up forces
 	RollTorque = 50000000.0f;
 	JumpImpulse = 350000.0f;
