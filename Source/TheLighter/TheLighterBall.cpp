@@ -97,10 +97,16 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 	const bool bControllerQuerySuccess = false;
 	if (bMouseQuerySuccess)
 	{
-		const FVector actorLocation = GetActorLocation();
-		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseLocation.Y, mouseLocation.Z));
-		const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(spotLightDirection);
+		const float HIT_TEST_DISTANCE = 1000.f;
 
+		FHitResult hit;
+		GetWorld()->LineTraceSingleByChannel(hit, mouseLocation, mouseLocation + mouseDirection * HIT_TEST_DISTANCE, ECollisionChannel::ECC_Visibility);
+		const FVector mouseWorldLocation = hit.bBlockingHit ? hit.ImpactPoint : hit.TraceEnd;
+
+		const FVector actorLocation = GetActorLocation();
+		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseWorldLocation.Y, mouseWorldLocation.Z));
+		const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(spotLightDirection);
+		
 		SpotLight->SetWorldRotation(spotLightRotation);
 		LastRotation = spotLightRotation;
 	}
