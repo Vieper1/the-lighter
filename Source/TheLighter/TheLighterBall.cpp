@@ -9,6 +9,8 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Components/SpotLightComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 
 
@@ -54,6 +56,7 @@ ATheLighterBall::ATheLighterBall()
 	SpotLight = CreateDefaultSubobject<USpotLightComponent>(TEXT("SpotLight0"));
 	SpotLight->SetupAttachment(RootComponent);
 	SpotLight->SetRelativeRotation(FRotator(0, 90, 0));
+	SpotLight->SetUsingAbsoluteRotation(true);
 
 	
 	// Set up forces
@@ -86,8 +89,37 @@ void ATheLighterBall::BeginPlay()
 void ATheLighterBall::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	APlayerController * playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	FVector mouseLocation;
+	FVector mouseDirection;
+	const bool bMouseQuerySuccess = playerController->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
+	const bool bControllerQuerySuccess = false;
+	if (bMouseQuerySuccess)
+	{
+		const FVector actorLocation = GetActorLocation();
+		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseLocation.Y, mouseLocation.Z));
+		const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(spotLightDirection);
+
+		SpotLight->SetWorldRotation(spotLightRotation);
+		LastRotation = spotLightRotation;
+	}
+
+	if (!bMouseQuerySuccess && !bControllerQuerySuccess)
+	{
+		SpotLight->SetWorldRotation(LastRotation);
+	}
 }
 #pragma endregion
+
+
+
+
+
+
+
+
+
 
 
 #pragma region INPUT

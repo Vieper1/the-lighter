@@ -66,6 +66,9 @@ public:
 	UPROPERTY(EditAnywhere, Category=Ball)
 		float RollTorque;
 
+private:
+	FRotator LastRotation;
+
 protected:
 	void MoveRight(float Val);
 	void MoveForward(float Val);
