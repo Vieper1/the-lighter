@@ -11,6 +11,7 @@
 #include "Components/SpotLightComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "DrawDebugHelpers.h"
 
 
 
@@ -81,9 +82,11 @@ void ATheLighterBall::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Initial Config
 	if (MaxAngularVelocity > 0.f)
 		Ball->SetPhysicsMaxAngularVelocityInRadians(MaxAngularVelocity);
-	
+
+	TraceAngle = SpotLight->OuterConeAngle - TraceAngleCorrection;
 
 	APlayerController * player0 = GetWorld()->GetFirstPlayerController();
 	if (player0) player0->Possess(this);
@@ -92,6 +95,8 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+
+	// Input
 	APlayerController * playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	FVector mouseLocation;
 	FVector mouseDirection;
@@ -117,6 +122,9 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 	{
 		SpotLight->SetWorldRotation(LastRotation);
 	}
+
+	// Trace
+	TraceCollision();
 }
 #pragma endregion
 
@@ -145,6 +153,21 @@ void ATheLighterBall::Jump()
 		Ball->AddImpulse(Impulse);
 		bCanJump = false;
 	}
+}
+#pragma endregion
+
+
+
+#pragma region SCANNER
+void ATheLighterBall::TraceCollision()
+{
+	TArray<FHitResult> hitArray;
+
+	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
+	const FRotator lineMinRotation = FRotator(spotLightRotation.Pitch - TraceAngle, spotLightRotation.Yaw, spotLightRotation.Roll);
+	const FRotator lineMaxRotation = FRotator(spotLightRotation.Pitch + TraceAngle, spotLightRotation.Yaw, spotLightRotation.Roll);
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + lineMinRotation.Vector() * TraceLength, FColor::Red);
+	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + lineMaxRotation.Vector() * TraceLength, FColor::Red);
 }
 #pragma endregion
 

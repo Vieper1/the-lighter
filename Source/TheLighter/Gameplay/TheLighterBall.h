@@ -32,7 +32,9 @@ public:
 
 	
 #pragma region CONFIG
-	
+public:
+	UPROPERTY(EditAnywhere, Category = "1. Config")
+		bool ShowDebugTraces = false;
 #pragma endregion
 
 
@@ -80,6 +82,24 @@ private:
 protected:
 	void MoveRight(float Val);
 	void Jump();
+#pragma endregion
+
+
+#pragma region SCANNER
+	float TraceAngle = 45.f;
+	UPROPERTY(EditAnywhere, Category = "4. Scanner")
+		int NumberOfTraces = 2;
+
+	UPROPERTY(EditAnywhere, Category = "4. Scanner")
+		float TraceLength = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "4. Scanner", meta = (ClampMin = "0.0", ClampMax = "30.0"))
+		float TraceAngleCorrection = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, Category = "4. Scanner")
+		TArray<AActor *> HitSet;
+
+	void TraceCollision();
 #pragma endregion
 
 
