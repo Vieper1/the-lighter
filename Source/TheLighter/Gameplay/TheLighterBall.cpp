@@ -60,17 +60,16 @@ ATheLighterBall::ATheLighterBall()
 
 	
 	// Set up forces
-	RollTorque = 50000000.0f;
-	JumpImpulse = 350000.0f;
-	bCanJump = true; // Start being able to jump
+	RollTorque = 50.f;
+	RollTorqueMultiplier = 1000000.f;
+	JumpImpulse = 350.0f;
+	bCanJump = true;
 }
 
 void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
 	// set up gameplay key bindings
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATheLighterBall::MoveRight);
-	PlayerInputComponent->BindAxis("MoveForward", this, &ATheLighterBall::MoveForward);
-
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
 }
 #pragma endregion
@@ -81,7 +80,10 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 void ATheLighterBall::BeginPlay()
 {
 	Super::BeginPlay();
-	if (BallMaterial) Ball->SetMaterial(0, BallMaterial);
+
+	if (MaxAngularVelocity > 0.f)
+		Ball->SetPhysicsMaxAngularVelocityInRadians(MaxAngularVelocity);
+	
 
 	APlayerController * player0 = GetWorld()->GetFirstPlayerController();
 	if (player0) player0->Possess(this);
@@ -131,14 +133,8 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 #pragma region INPUT
 void ATheLighterBall::MoveRight(float Val)
 {
-	const FVector Torque = FVector(-1.f * Val * RollTorque, 0.f, 0.f);
+	const FVector Torque = FVector(-1.f * Val * RollTorque * RollTorqueMultiplier, 0.f, 0.f);
 	Ball->AddTorqueInRadians(Torque);
-}
-
-void ATheLighterBall::MoveForward(float Val)
-{
-	const FVector Torque = FVector(0.f, Val * RollTorque, 0.f);
-	Ball->AddTorqueInRadians(Torque);	
 }
 
 void ATheLighterBall::Jump()

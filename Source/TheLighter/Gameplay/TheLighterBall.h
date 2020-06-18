@@ -28,30 +28,33 @@ public:
 
 
 
+
+
+	
+#pragma region CONFIG
+	
+#pragma endregion
+
+
+	
+
+
+	
 	
 #pragma region MODE
-	UPROPERTY(EditAnywhere, Category = "Mode")
+	UPROPERTY(EditAnywhere, Category = "2. Mode")
 		bool bDisableAirControl;
 
-	UPROPERTY(EditAnywhere, Category = "Mode")
+	UPROPERTY(EditAnywhere, Category = "2. Mode")
 		bool bDisableJump;
 
-	UPROPERTY(EditAnywhere, Category = "Mode")
+	UPROPERTY(EditAnywhere, Category = "2. Mode")
 		bool bDisableMovement;
 #pragma endregion
 
-#pragma region CONFIG
-	UPROPERTY(EditAnywhere, Category = "Mode")
-		UMaterialInterface * BallMaterial;
-#pragma endregion
 
 
 
-
-#pragma region BEGINPLAY & TICK
-	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaSeconds) override;
-#pragma endregion
 
 
 
@@ -59,22 +62,25 @@ public:
 	
 #pragma region MOVEMENT
 public:
+	UPROPERTY(EditAnywhere, Category = "3. Movement")
+		float RollTorque;
+	
+	UPROPERTY(EditAnywhere, Category = "3. Movement")
+		float MaxAngularVelocity = 0.0f;
+	
 	bool bCanJump;
-	UPROPERTY(EditAnywhere, Category=Ball)
+	UPROPERTY(EditAnywhere, Category = "3. Movement")
 		float JumpImpulse;
 
-	UPROPERTY(EditAnywhere, Category=Ball)
-		float RollTorque;
 
 private:
 	FRotator LastRotation;
+	float RollTorqueMultiplier;
 
 protected:
 	void MoveRight(float Val);
-	void MoveForward(float Val);
 	void Jump();
 #pragma endregion
-	
 
 
 
@@ -82,5 +88,16 @@ protected:
 #pragma region COLLISION
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+#pragma endregion
+
+
+
+
+
+
+
+#pragma region BEGINPLAY & TICK
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 #pragma endregion
 };
