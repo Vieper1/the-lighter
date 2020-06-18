@@ -87,7 +87,7 @@ protected:
 
 #pragma region SCANNER
 	float TraceAngle = 45.f;
-	UPROPERTY(EditAnywhere, Category = "4. Scanner")
+	UPROPERTY(EditAnywhere, Category = "4. Scanner", meta = (ClampMin = "0", ClampMax = "8"))
 		int NumberOfTraces = 2;
 
 	UPROPERTY(EditAnywhere, Category = "4. Scanner")

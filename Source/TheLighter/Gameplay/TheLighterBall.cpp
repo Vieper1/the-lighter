@@ -164,10 +164,16 @@ void ATheLighterBall::TraceCollision()
 	TArray<FHitResult> hitArray;
 
 	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
-	const FRotator lineMinRotation = FRotator(spotLightRotation.Pitch - TraceAngle, spotLightRotation.Yaw, spotLightRotation.Roll);
-	const FRotator lineMaxRotation = FRotator(spotLightRotation.Pitch + TraceAngle, spotLightRotation.Yaw, spotLightRotation.Roll);
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + lineMinRotation.Vector() * TraceLength, FColor::Red);
-	DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + lineMaxRotation.Vector() * TraceLength, FColor::Red);
+	
+
+	for (int i = 0; i < NumberOfTraces; i++)
+	{
+		if (ShowDebugTraces)
+		{
+			const FRotator lineRotation = UKismetMathLibrary::ComposeRotators(spotLightRotation, FRotator(0, 0, -TraceAngle + (TraceAngle * 2 * i / (NumberOfTraces - 1))));
+			DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + lineRotation.Vector() * TraceLength, FColor::Red);
+		}
+	}
 }
 #pragma endregion
 
