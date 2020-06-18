@@ -97,7 +97,7 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 	const bool bControllerQuerySuccess = false;
 	if (bMouseQuerySuccess)
 	{
-		const float HIT_TEST_DISTANCE = 1000.f;
+		const float HIT_TEST_DISTANCE = 10000.f;
 
 		FHitResult hit;
 		GetWorld()->LineTraceSingleByChannel(hit, mouseLocation, mouseLocation + mouseDirection * HIT_TEST_DISTANCE, ECollisionChannel::ECC_Visibility);

@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "TheLighterGameMode.h"
-#include "TheLighterBall.h"
+#include "Gameplay/TheLighterBall.h"
 
 ATheLighterGameMode::ATheLighterGameMode()
 {
