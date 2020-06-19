@@ -3,3 +3,8 @@
 
 #include "Block.h"
 
+ABlock::ABlock()
+{
+	UStaticMeshComponent* meshComp = GetStaticMeshComponent();
+	meshComp->SetCollisionProfileName(FName("LighterBlock"));
+}

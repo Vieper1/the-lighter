@@ -14,5 +14,6 @@ class ABlock : public AStaticMeshActor
 {
 	GENERATED_BODY()
 
-	
+public:
+	ABlock();
 };

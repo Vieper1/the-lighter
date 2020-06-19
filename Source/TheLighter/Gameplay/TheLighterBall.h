@@ -85,21 +85,22 @@ protected:
 #pragma endregion
 
 
-#pragma region SCANNER
+#pragma region TRACER
 	float TraceAngle = 45.f;
-	UPROPERTY(EditAnywhere, Category = "4. Scanner", meta = (ClampMin = "0", ClampMax = "8"))
+	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0", ClampMax = "8"))
 		int NumberOfTraces = 2;
 
-	UPROPERTY(EditAnywhere, Category = "4. Scanner")
+	UPROPERTY(EditAnywhere, Category = "4. Tracer")
 		float TraceLength = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category = "4. Scanner", meta = (ClampMin = "0.0", ClampMax = "30.0"))
+	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0", ClampMax = "30.0"))
 		float TraceAngleCorrection = 0.0f;
 
-	UPROPERTY(VisibleAnywhere, Category = "4. Scanner")
-		TArray<AActor *> HitSet;
-
+		
+	TArray<AActor*> HitSet;
 	void TraceCollision();
+	inline void HitSetAdd(AActor * actorRef);
+	inline void HitSetRemove(AActor * actorRef);
 #pragma endregion
 
 

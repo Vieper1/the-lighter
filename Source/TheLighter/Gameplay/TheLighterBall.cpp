@@ -125,6 +125,9 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 	// Trace
 	TraceCollision();
+
+	for (const AActor* actorRef : HitSet)
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("%s"), *actorRef->GetName()));
 }
 #pragma endregion
 
@@ -158,11 +161,15 @@ void ATheLighterBall::Jump()
 
 
 
+
+
+
+
+
+
 #pragma region SCANNER
 void ATheLighterBall::TraceCollision()
 {
-	TArray<FHitResult> hitArray;
-
 	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
 	
 
@@ -171,9 +178,29 @@ void ATheLighterBall::TraceCollision()
 		if (ShowDebugTraces)
 		{
 			const FRotator lineRotation = UKismetMathLibrary::ComposeRotators(spotLightRotation, FRotator(0, 0, -TraceAngle + (TraceAngle * 2 * i / (NumberOfTraces - 1))));
-			DrawDebugLine(GetWorld(), GetActorLocation(), GetActorLocation() + lineRotation.Vector() * TraceLength, FColor::Red);
+			const FVector traceStart = GetActorLocation();
+			const FVector traceEnd = GetActorLocation() + lineRotation.Vector() * TraceLength;
+			DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+
+			FHitResult outHit;
+			GetWorld()->LineTraceSingleByChannel(outHit, traceStart, traceEnd, ECollisionChannel::ECC_GameTraceChannel1);
+
+			if (outHit.bBlockingHit)
+				HitSetAdd(outHit.GetActor());
 		}
 	}
+}
+
+void ATheLighterBall::HitSetAdd(AActor * actorRef)
+{
+	if (!HitSet.Contains(actorRef))
+		HitSet.Add(actorRef);
+}
+
+void ATheLighterBall::HitSetRemove(AActor * actorRef)
+{
+	if (HitSet.Contains(actorRef))
+		HitSet.Remove(actorRef);
 }
 #pragma endregion
 
