@@ -15,5 +15,17 @@ class ABlock : public AStaticMeshActor
 	GENERATED_BODY()
 
 public:
+#pragma region INIT
 	ABlock();
+#pragma endregion
+
+	
+#pragma region COLLISION
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "1. Block")
+		bool bLit;
+	
+	UFUNCTION(BlueprintCallable, Category = "1. block")
+		void SetOverlapEnabled(const bool bShouldOverlap);
+#pragma endregion
 };
