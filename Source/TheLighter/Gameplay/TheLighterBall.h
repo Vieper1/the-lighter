@@ -22,10 +22,15 @@ class ATheLighterBall : public APawn
 		class USpotLightComponent * SpotLight;
 #pragma endregion
 
+
+
+
 	
+#pragma region INIT
 public:
 	ATheLighterBall();
-
+	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+#pragma endregion
 
 
 
@@ -85,6 +90,10 @@ protected:
 #pragma endregion
 
 
+
+
+
+	
 #pragma region TRACER
 	float TraceAngle = 45.f;
 	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0", ClampMax = "8"))
@@ -97,10 +106,10 @@ protected:
 		float TraceAngleCorrection = 0.0f;
 
 		
-	TArray<AActor*> HitSet;
+	TArray<class ABlock*> LitSet;
 	void TraceCollision();
-	inline void HitSetAdd(AActor * actorRef);
-	inline void HitSetRemove(AActor * actorRef);
+	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef);
+	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef);
 #pragma endregion
 
 
@@ -108,7 +117,15 @@ protected:
 
 #pragma region COLLISION
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* InputComponent) override;
+#pragma endregion
+
+
+
+
+
+#pragma region INPUT
+	bool QueryMouseInput(class APlayerController* playerController);
+	bool QueryControllerInput(class APlayerController* playerController);
 #pragma endregion
 
 

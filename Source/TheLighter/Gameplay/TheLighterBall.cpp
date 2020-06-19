@@ -11,6 +11,7 @@
 #include "Components/SpotLightComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Block.h"
 #include "DrawDebugHelpers.h"
 
 
@@ -77,6 +78,11 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 
 
+
+
+
+
+
 #pragma region BEGINPLAY & TICK
 void ATheLighterBall::BeginPlay()
 {
@@ -91,49 +97,116 @@ void ATheLighterBall::BeginPlay()
 	APlayerController * player0 = GetWorld()->GetFirstPlayerController();
 	if (player0) player0->Possess(this);
 }
+
+
+
+
+
 void ATheLighterBall::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
 
-	// Input
 	APlayerController * playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	FVector mouseLocation;
-	FVector mouseDirection;
-	const bool bMouseQuerySuccess = playerController->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
-	const bool bControllerQuerySuccess = false;
-	if (bMouseQuerySuccess)
-	{
-		const float HIT_TEST_DISTANCE = 10000.f;
-
-		FHitResult hit;
-		GetWorld()->LineTraceSingleByChannel(hit, mouseLocation, mouseLocation + mouseDirection * HIT_TEST_DISTANCE, ECollisionChannel::ECC_Visibility);
-		const FVector mouseWorldLocation = hit.bBlockingHit ? hit.ImpactPoint : hit.TraceEnd;
-
-		const FVector actorLocation = GetActorLocation();
-		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseWorldLocation.Y, mouseWorldLocation.Z));
-		const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(spotLightDirection);
-		
-		SpotLight->SetWorldRotation(spotLightRotation);
-		LastRotation = spotLightRotation;
-	}
-
-	if (!bMouseQuerySuccess && !bControllerQuerySuccess)
-	{
+	if (!QueryMouseInput(playerController) && !QueryControllerInput(playerController))
 		SpotLight->SetWorldRotation(LastRotation);
-	}
 
-	// Trace
+	
 	TraceCollision();
-
-	for (const AActor* actorRef : HitSet)
-		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Red, FString::Printf(TEXT("%s"), *actorRef->GetName()));
 }
 #pragma endregion
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#pragma region TRACER
+void ATheLighterBall::TraceCollision()
+{
+	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
+	TArray<ABlock*> hitSet;
+	
+	for (int i = 0; i < NumberOfTraces; i++)
+	{
+		const FRotator lineRotation = UKismetMathLibrary::ComposeRotators(spotLightRotation, FRotator(0, 0, -TraceAngle + (TraceAngle * 2 * i / (NumberOfTraces - 1))));
+		const FVector traceStart = GetActorLocation();
+		const FVector traceEnd = GetActorLocation() + lineRotation.Vector() * TraceLength;
+
+		FHitResult outHit;
+		GetWorld()->LineTraceSingleByChannel(outHit, traceStart, traceEnd, ECollisionChannel::ECC_GameTraceChannel1);
+
+		if (ShowDebugTraces)
+			DrawDebugLine(GetWorld(), traceStart, outHit.bBlockingHit ? outHit.ImpactPoint : traceEnd, FColor::Red);
+
+		if (outHit.bBlockingHit)
+			SetAdd(hitSet, Cast<ABlock>(outHit.GetActor()));
+	}
+
+
+	if (LitSet.Num() == 0)
+	{
+		for (ABlock* hitActor : hitSet)
+			SetAdd(LitSet, hitActor);
+	}
+	else
+	{
+		for (int i = 0; i < LitSet.Num(); ++i)
+		{
+			if (!hitSet.Contains(LitSet[i]))
+			{
+				SetRemove(LitSet, LitSet[i]);
+				continue;
+			}
+			for (ABlock* hitActor : hitSet)
+			{
+				SetAdd(LitSet, hitActor);
+			}
+		}
+	}
+}
+
+bool ATheLighterBall::SetAdd(TArray<ABlock*>& arrayRef, ABlock* actorRef)
+{
+	if (!arrayRef.Contains(actorRef))
+	{
+		if (actorRef->CurrentCollisionResponse != ECR_Block)
+			actorRef->SetCollisionMode(ECR_Block);
+		arrayRef.Add(actorRef);
+		return true;
+	}
+	return false;
+}
+
+bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef)
+{
+	if (arrayRef.Contains(actorRef))
+	{
+		if (actorRef->CurrentCollisionResponse != ECR_Overlap)
+			actorRef->SetCollisionMode(ECR_Overlap);
+		arrayRef.Remove(actorRef);
+		return true;
+	}
+	return false;
+}
+#pragma endregion
 
 
 
@@ -150,14 +223,13 @@ void ATheLighterBall::MoveRight(float Val)
 
 void ATheLighterBall::Jump()
 {
-	if(bCanJump)
+	if (bCanJump)
 	{
 		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse);
 		Ball->AddImpulse(Impulse);
 		bCanJump = false;
 	}
 }
-#pragma endregion
 
 
 
@@ -165,44 +237,39 @@ void ATheLighterBall::Jump()
 
 
 
-
-
-#pragma region SCANNER
-void ATheLighterBall::TraceCollision()
+bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 {
-	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
-	
-
-	for (int i = 0; i < NumberOfTraces; i++)
+	FVector mouseLocation;
+	FVector mouseDirection;
+	const bool bMouseQuerySuccess = playerController->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
+	if (bMouseQuerySuccess)
 	{
-		if (ShowDebugTraces)
-		{
-			const FRotator lineRotation = UKismetMathLibrary::ComposeRotators(spotLightRotation, FRotator(0, 0, -TraceAngle + (TraceAngle * 2 * i / (NumberOfTraces - 1))));
-			const FVector traceStart = GetActorLocation();
-			const FVector traceEnd = GetActorLocation() + lineRotation.Vector() * TraceLength;
-			DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+		const float HIT_TEST_DISTANCE = 10000.f;
 
-			FHitResult outHit;
-			GetWorld()->LineTraceSingleByChannel(outHit, traceStart, traceEnd, ECollisionChannel::ECC_GameTraceChannel1);
+		FHitResult hit;
+		GetWorld()->LineTraceSingleByChannel(hit, mouseLocation, mouseLocation + mouseDirection * HIT_TEST_DISTANCE, ECollisionChannel::ECC_Visibility);
+		const FVector mouseWorldLocation = hit.bBlockingHit ? hit.ImpactPoint : hit.TraceEnd;
 
-			if (outHit.bBlockingHit)
-				HitSetAdd(outHit.GetActor());
-		}
+		const FVector actorLocation = GetActorLocation();
+		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseWorldLocation.Y, mouseWorldLocation.Z));
+		const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(spotLightDirection);
+
+		SpotLight->SetWorldRotation(spotLightRotation);
+		LastRotation = spotLightRotation;
+		return true;
 	}
+	return false;
 }
-
-void ATheLighterBall::HitSetAdd(AActor * actorRef)
+bool ATheLighterBall::QueryControllerInput(APlayerController* playerController)
 {
-	if (!HitSet.Contains(actorRef))
-		HitSet.Add(actorRef);
-}
-
-void ATheLighterBall::HitSetRemove(AActor * actorRef)
-{
-	if (HitSet.Contains(actorRef))
-		HitSet.Remove(actorRef);
+	return false;
 }
 #pragma endregion
+
+
+
+
+
 
 
 

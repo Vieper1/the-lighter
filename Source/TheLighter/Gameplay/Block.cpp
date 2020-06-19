@@ -14,15 +14,13 @@ ABlock::ABlock()
 
 
 #pragma region COLLISION
-void ABlock::SetOverlapEnabled(const bool bShouldOverlap)
+void ABlock::SetCollisionMode(const ECollisionResponse collisionResponse)
 {
 	UStaticMeshComponent* meshComp = GetStaticMeshComponent();
 
-	FCollisionResponseContainer container;
-	container.SetResponse(ECC_Pawn, bShouldOverlap ? ECR_Overlap : ECR_Block);
-	container.SetResponse(ECC_PhysicsBody, bShouldOverlap ? ECR_Overlap : ECR_Block);
-	meshComp->SetCollisionResponseToChannels(container);
+	meshComp->SetCollisionResponseToChannel(ECC_Pawn, collisionResponse);
+	meshComp->SetCollisionResponseToChannel(ECC_PhysicsBody, collisionResponse);
 
-	bLit = bShouldOverlap;
+	CurrentCollisionResponse = collisionResponse;
 }
 #pragma endregion

@@ -22,10 +22,8 @@ public:
 	
 #pragma region COLLISION
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "1. Block")
-		bool bLit;
-	
+	ECollisionResponse CurrentCollisionResponse;
 	UFUNCTION(BlueprintCallable, Category = "1. block")
-		void SetOverlapEnabled(const bool bShouldOverlap);
+		void SetCollisionMode(const ECollisionResponse CollisionResponse);
 #pragma endregion
 };
