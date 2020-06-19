@@ -13,13 +13,17 @@ class ATheLighterBall : public APawn
 
 #pragma region CORE COMPONENTS
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Core", meta = (AllowPrivateAccess = "true"))
-		class UStaticMeshComponent * Ball;
+		class UStaticMeshComponent* Ball;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Core", meta = (AllowPrivateAccess = "true"))
-		class USpringArmComponent * SpringArm;
+		class USpringArmComponent* SpringArm;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Core", meta = (AllowPrivateAccess = "true"))
-		class UCameraComponent * Camera;
+		class UCameraComponent* Camera;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Core", meta = (AllowPrivateAccess = "true"))
-		class USpotLightComponent * SpotLight;
+		class USpotLightComponent* SpotLight;
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Core")
+		FORCEINLINE class UStaticMeshComponent* GetMesh() const { return Ball; }
 #pragma endregion
 
 
@@ -47,8 +51,13 @@ public:
 
 
 	
+
+	
 	
 #pragma region MODE
+	UPROPERTY(EditAnywhere, Category = "2. Mode")
+		bool bDisableInput;
+
 	UPROPERTY(EditAnywhere, Category = "2. Mode")
 		bool bDisableAirControl;
 
@@ -56,7 +65,7 @@ public:
 		bool bDisableJump;
 
 	UPROPERTY(EditAnywhere, Category = "2. Mode")
-		bool bDisableMovement;
+		bool bDisableExitImpulse;
 #pragma endregion
 
 
@@ -79,10 +88,17 @@ public:
 	UPROPERTY(EditAnywhere, Category = "3. Movement")
 		float JumpImpulse;
 
+	UPROPERTY(EditAnywhere, Category = "3. Movement")
+		float ExitImpulse;
+
+	UFUNCTION(BlueprintCallable, Category = "3. Movement")
+		void ApplyExitImpulse();
+
 
 private:
 	FRotator LastRotation;
 	float RollTorqueMultiplier;
+	float ImpulseMultiplier;
 
 protected:
 	void MoveRight(float Val);
@@ -91,6 +107,12 @@ protected:
 
 
 
+
+
+
+
+
+	
 
 
 	
@@ -115,6 +137,11 @@ protected:
 
 
 
+
+
+	
+
+
 #pragma region COLLISION
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 #pragma endregion
@@ -122,6 +149,9 @@ protected:
 
 
 
+
+
+	
 
 #pragma region INPUT
 	bool QueryMouseInput(class APlayerController* playerController);
@@ -132,6 +162,9 @@ protected:
 
 
 
+
+
+	
 
 
 #pragma region BEGINPLAY & TICK

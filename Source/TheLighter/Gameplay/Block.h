@@ -28,8 +28,12 @@ public:
 private:
 	ECollisionResponse CurrentCollisionResponse;
 	void SetCollisionMode(const ECollisionResponse CollisionResponse);
+	
 public:
 	ECollisionResponse TargetCollisionResponse;
+
+	UFUNCTION()
+		void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 #pragma endregion
 
 

@@ -2,6 +2,7 @@
 
 
 #include "Block.h"
+#include "TheLighterBall.h"
 
 #pragma region CORE
 ABlock::ABlock()
@@ -9,6 +10,7 @@ ABlock::ABlock()
 	MeshComp = GetStaticMeshComponent();
 	MeshComp->SetCollisionProfileName(FName("LighterBlock"));
 	MeshComp->SetGenerateOverlapEvents(true);
+	MeshComp->OnComponentEndOverlap.AddDynamic(this, &ABlock::OnComponentEndOverlap);
 }
 #pragma endregion
 
@@ -29,6 +31,11 @@ void ABlock::SetCollisionMode(const ECollisionResponse CollisionResponse)
 
 
 
+
+
+
+
+
 #pragma region EVENTS
 void ABlock::Tick(float DeltaSeconds)
 {
@@ -38,5 +45,15 @@ void ABlock::Tick(float DeltaSeconds)
 	MeshComp->GetOverlappingActors(overlappingActors);
 	if (CurrentCollisionResponse != TargetCollisionResponse && overlappingActors.Num() == 0)
 		SetCollisionMode(TargetCollisionResponse);
+}
+
+void ABlock::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	APawn* playerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+	if (playerPawn && OtherActor == playerPawn)
+	{
+		ATheLighterBall* playerBall = Cast<ATheLighterBall>(playerPawn);
+		playerBall->ApplyExitImpulse();
+	}
 }
 #pragma endregion

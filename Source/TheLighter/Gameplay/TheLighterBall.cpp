@@ -64,7 +64,8 @@ ATheLighterBall::ATheLighterBall()
 	// Set up forces
 	RollTorque = 50.f;
 	RollTorqueMultiplier = 1000000.f;
-	JumpImpulse = 350.0f;
+	JumpImpulse = 350.f;
+	ImpulseMultiplier = 1000.f;
 	bCanJump = true;
 }
 
@@ -75,6 +76,10 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
 }
 #pragma endregion
+
+
+
+
 
 
 
@@ -214,6 +219,16 @@ bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef)
 
 
 
+
+
+
+
+
+
+
+
+
+
 #pragma region INPUT
 void ATheLighterBall::MoveRight(float Val)
 {
@@ -225,16 +240,11 @@ void ATheLighterBall::Jump()
 {
 	if (bCanJump)
 	{
-		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse);
+		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
 		Ball->AddImpulse(Impulse);
 		bCanJump = false;
 	}
 }
-
-
-
-
-
 
 
 bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
@@ -275,10 +285,27 @@ bool ATheLighterBall::QueryControllerInput(APlayerController* playerController)
 
 
 
+
+
+
 #pragma region COLLISION
 void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 	bCanJump = true;
+}
+#pragma endregion
+
+
+
+
+
+
+#pragma region MOVEMENT
+void ATheLighterBall::ApplyExitImpulse()
+{
+	const FVector ballVelocity = GetVelocity();
+	if (!bDisableExitImpulse)
+		Ball->AddImpulse(ballVelocity.GetSafeNormal() * ExitImpulse * ImpulseMultiplier);
 }
 #pragma endregion
