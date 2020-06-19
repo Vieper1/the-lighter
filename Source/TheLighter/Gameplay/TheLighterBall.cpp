@@ -187,8 +187,8 @@ bool ATheLighterBall::SetAdd(TArray<ABlock*>& arrayRef, ABlock* actorRef)
 {
 	if (!arrayRef.Contains(actorRef))
 	{
-		if (actorRef->CurrentCollisionResponse != ECR_Block)
-			actorRef->SetCollisionMode(ECR_Block);
+		if (actorRef->TargetCollisionResponse != ECR_Block)
+			actorRef->TargetCollisionResponse = ECR_Block;
 		arrayRef.Add(actorRef);
 		return true;
 	}
@@ -199,8 +199,8 @@ bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef)
 {
 	if (arrayRef.Contains(actorRef))
 	{
-		if (actorRef->CurrentCollisionResponse != ECR_Overlap)
-			actorRef->SetCollisionMode(ECR_Overlap);
+		if (actorRef->TargetCollisionResponse != ECR_Overlap)
+			actorRef->TargetCollisionResponse = ECR_Overlap;
 		arrayRef.Remove(actorRef);
 		return true;
 	}
