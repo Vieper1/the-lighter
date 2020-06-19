@@ -14,16 +14,30 @@ class ABlock : public AStaticMeshActor
 {
 	GENERATED_BODY()
 
+#pragma region CORE
 public:
-#pragma region INIT
 	ABlock();
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+		class UStaticMeshComponent* MeshComp;
 #pragma endregion
 
 	
+
+	
 #pragma region COLLISION
-public:
+private:
 	ECollisionResponse CurrentCollisionResponse;
-	UFUNCTION(BlueprintCallable, Category = "1. block")
-		void SetCollisionMode(const ECollisionResponse CollisionResponse);
+	void SetCollisionMode(const ECollisionResponse CollisionResponse);
+public:
+	ECollisionResponse TargetCollisionResponse;
+#pragma endregion
+
+
+
+	
+#pragma region EVENTS
+public:
+	
+	virtual void Tick(float DeltaSeconds) override;
 #pragma endregion
 };
