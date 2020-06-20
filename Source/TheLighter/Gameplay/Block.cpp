@@ -10,6 +10,7 @@ ABlock::ABlock()
 	MeshComp = GetStaticMeshComponent();
 	MeshComp->SetCollisionProfileName(FName("LighterBlock"));
 	MeshComp->SetGenerateOverlapEvents(true);
+	MeshComp->SetMobility(EComponentMobility::Stationary);
 	MeshComp->OnComponentEndOverlap.AddDynamic(this, &ABlock::OnComponentEndOverlap);
 }
 #pragma endregion
