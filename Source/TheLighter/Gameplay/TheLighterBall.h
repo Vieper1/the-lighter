@@ -44,9 +44,6 @@ public:
 public:
 	UPROPERTY(EditAnywhere, Category = "1. Config")
 		bool ShowDebugTrace = false;
-	
-	UPROPERTY(EditAnywhere, Category = "1. Config")
-		float CameraYOffset = 0.f;
 #pragma endregion
 
 
