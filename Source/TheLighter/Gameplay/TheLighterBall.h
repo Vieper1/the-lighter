@@ -43,7 +43,10 @@ public:
 #pragma region CONFIG
 public:
 	UPROPERTY(EditAnywhere, Category = "1. Config")
-		bool ShowDebugTraces = false;
+		bool ShowDebugTrace = false;
+	
+	UPROPERTY(EditAnywhere, Category = "1. Config")
+		float CameraYOffset = 0.f;
 #pragma endregion
 
 
@@ -79,12 +82,17 @@ public:
 #pragma region MOVEMENT
 public:
 	UPROPERTY(EditAnywhere, Category = "3. Movement")
+		float LateralForce;
+	
+	UPROPERTY(EditAnywhere, Category = "3. Movement")
 		float RollTorque;
 	
 	UPROPERTY(EditAnywhere, Category = "3. Movement")
 		float MaxAngularVelocity = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "3. Movement")
+		bool bIsGrounded = false;
 	
-	bool bCanJump;
 	UPROPERTY(EditAnywhere, Category = "3. Movement")
 		float JumpImpulse;
 
@@ -97,8 +105,8 @@ public:
 
 private:
 	FRotator LastRotation;
-	float RollTorqueMultiplier;
-	float ImpulseMultiplier;
+	float RollTorqueMultiplier = 1000000.f;
+	float ImpulseMultiplier = 1000.f;
 
 protected:
 	void MoveRight(float Val);
@@ -127,11 +135,18 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0", ClampMax = "30.0"))
 		float TraceAngleCorrection = 0.0f;
 
+	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0"))
+		float TraceGroundingThreshold = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0"))
+		float TraceGroundingSeparation = 1.0f;
+
 		
 	TArray<class ABlock*> LitSet;
 	void TraceCollision();
 	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef);
 	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef);
+	bool TraceGrounding();
 #pragma endregion
 
 

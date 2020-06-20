@@ -63,10 +63,7 @@ ATheLighterBall::ATheLighterBall()
 	
 	// Set up forces
 	RollTorque = 50.f;
-	RollTorqueMultiplier = 1000000.f;
 	JumpImpulse = 350.f;
-	ImpulseMultiplier = 1000.f;
-	bCanJump = true;
 }
 
 void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -118,6 +115,7 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 	
 	TraceCollision();
+	bIsGrounded = TraceGrounding();
 }
 #pragma endregion
 
@@ -158,7 +156,7 @@ void ATheLighterBall::TraceCollision()
 		FHitResult outHit;
 		GetWorld()->LineTraceSingleByChannel(outHit, traceStart, traceEnd, ECollisionChannel::ECC_GameTraceChannel1);
 
-		if (ShowDebugTraces)
+		if (ShowDebugTrace)
 			DrawDebugLine(GetWorld(), traceStart, outHit.bBlockingHit ? outHit.ImpactPoint : traceEnd, FColor::Red);
 
 		if (outHit.bBlockingHit)
@@ -211,6 +209,31 @@ bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef)
 	}
 	return false;
 }
+
+bool ATheLighterBall::TraceGrounding()
+{
+	UWorld* world = GetWorld();
+	const FVector startLocation = GetActorLocation();
+	const FVector rightTraceLocation = GetActorLocation() + (FVector::UpVector * -TraceGroundingThreshold) + (FVector::RightVector * TraceGroundingSeparation);
+	const FVector leftTraceLocation = rightTraceLocation + (FVector::RightVector * -2.f * TraceGroundingSeparation);
+
+	if (ShowDebugTrace)
+	{
+		DrawDebugLine(world, startLocation, rightTraceLocation, FColor::Red);
+		DrawDebugLine(world, startLocation, leftTraceLocation, FColor::Red);
+	}
+	
+	FHitResult leftHit;
+	world->LineTraceSingleByChannel(leftHit, startLocation, leftTraceLocation, ECC_Visibility);
+
+	FHitResult rightHit;
+	world->LineTraceSingleByChannel(rightHit, startLocation, rightTraceLocation, ECC_Visibility);
+
+	if (leftHit.bBlockingHit || rightHit.bBlockingHit)
+		return true;
+	
+	return false;
+}
 #pragma endregion
 
 
@@ -238,11 +261,10 @@ void ATheLighterBall::MoveRight(float Val)
 
 void ATheLighterBall::Jump()
 {
-	if (bCanJump)
+	if (bIsGrounded)
 	{
 		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
 		Ball->AddImpulse(Impulse);
-		bCanJump = false;
 	}
 }
 
@@ -292,7 +314,6 @@ bool ATheLighterBall::QueryControllerInput(APlayerController* playerController)
 void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-	bCanJump = true;
 }
 #pragma endregion
 
