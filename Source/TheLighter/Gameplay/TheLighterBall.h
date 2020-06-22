@@ -56,7 +56,7 @@ public:
 	
 #pragma region MODE
 	UPROPERTY(EditAnywhere, Category = "2. Mode")
-		bool bDisableInput;
+		bool bDisableMovement;
 
 	UPROPERTY(EditAnywhere, Category = "2. Mode")
 		bool bDisableAirControl;
@@ -87,7 +87,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "3. Movement")
 		float MaxAngularVelocity = 0.0f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "3. Movement")
+	UPROPERTY(BlueprintReadOnly, Category = "3. Movement")
 		bool bIsGrounded = false;
 	
 	UPROPERTY(EditAnywhere, Category = "3. Movement")
@@ -102,7 +102,7 @@ public:
 
 private:
 	FRotator LastRotation;
-	float RollTorqueMultiplier = 1000000.f;
+	float ForceMultiplier = 1000000.f;
 	float ImpulseMultiplier = 1000.f;
 
 protected:

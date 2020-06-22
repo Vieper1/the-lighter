@@ -255,12 +255,19 @@ bool ATheLighterBall::TraceGrounding()
 #pragma region INPUT
 void ATheLighterBall::MoveRight(float Val)
 {
-	const FVector Torque = FVector(-1.f * Val * RollTorque * RollTorqueMultiplier, 0.f, 0.f);
+	if (bDisableMovement) return;
+	if (!bDisableAirControl && !bIsGrounded)
+	{
+		const FVector Force = FVector(0, Val * LateralForce * ForceMultiplier, 0);
+		Ball->AddForce(Force);
+	}
+	const FVector Torque = FVector(-1.f * Val * RollTorque * ForceMultiplier, 0.f, 0.f);
 	Ball->AddTorqueInRadians(Torque);
 }
 
 void ATheLighterBall::Jump()
 {
+	if (bDisableMovement || bDisableJump) return;
 	if (bIsGrounded)
 	{
 		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
