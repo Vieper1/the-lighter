@@ -70,6 +70,9 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 {
 	// set up gameplay key bindings
 	PlayerInputComponent->BindAxis("MoveRight", this, &ATheLighterBall::MoveRight);
+	PlayerInputComponent->BindAxis("PointRight", this, &ATheLighterBall::PointRight);
+	PlayerInputComponent->BindAxis("PointUp", this, &ATheLighterBall::PointUp);
+	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
 }
 #pragma endregion
@@ -110,7 +113,7 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 
 	APlayerController * playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!QueryMouseInput(playerController) && !QueryControllerInput(playerController))
+	if (!QueryMouseInput(playerController) && !QueryGamepadInput(playerController))
 		SpotLight->SetWorldRotation(LastRotation);
 
 	
@@ -234,6 +237,14 @@ bool ATheLighterBall::TraceGrounding()
 	
 	return false;
 }
+
+void ATheLighterBall::SetTracerRotation(const FVector Direction)
+{
+	const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(Direction);
+
+	SpotLight->SetWorldRotation(spotLightRotation);
+	LastRotation = spotLightRotation;
+}
 #pragma endregion
 
 
@@ -265,6 +276,16 @@ void ATheLighterBall::MoveRight(float Val)
 	Ball->AddTorqueInRadians(Torque);
 }
 
+void ATheLighterBall::PointRight(float Val)
+{
+	InputGamepadRX = Val;
+}
+
+void ATheLighterBall::PointUp(float Val)
+{
+	InputGamepadRY = Val;
+}
+
 void ATheLighterBall::Jump()
 {
 	if (bDisableMovement || bDisableJump) return;
@@ -278,6 +299,12 @@ void ATheLighterBall::Jump()
 
 bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 {
+	float deltaX;
+	float deltaY;
+	playerController->GetInputMouseDelta(deltaX, deltaY);
+	if (fabs(deltaX) < MouseInputThreshold && fabs(deltaY) < MouseInputThreshold)
+		return false;
+	
 	FVector mouseLocation;
 	FVector mouseDirection;
 	const bool bMouseQuerySuccess = playerController->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
@@ -291,17 +318,24 @@ bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 
 		const FVector actorLocation = GetActorLocation();
 		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseWorldLocation.Y, mouseWorldLocation.Z));
-		const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(spotLightDirection);
-
-		SpotLight->SetWorldRotation(spotLightRotation);
-		LastRotation = spotLightRotation;
+		SetTracerRotation(spotLightDirection);
+		
 		return true;
 	}
 	return false;
 }
-bool ATheLighterBall::QueryControllerInput(APlayerController* playerController)
+bool ATheLighterBall::QueryGamepadInput(APlayerController* playerController)
 {
-	return false;
+	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::Printf(TEXT("%f %f"), InputGamepadRX, InputGamepadRY));
+	
+	if (fabs(InputGamepadRX) < GamepadInputThreshold && fabs(InputGamepadRY) < GamepadInputThreshold)
+		return false;
+	
+	const FVector actorLocation = GetActorLocation();
+	const FVector spotLightDirection = FVector(0, InputGamepadRX, InputGamepadRY);
+	SetTracerRotation(spotLightDirection);
+	
+	return true;
 }
 #pragma endregion
 

@@ -44,6 +44,12 @@ public:
 public:
 	UPROPERTY(EditAnywhere, Category = "1. Config")
 		bool ShowDebugTrace = false;
+
+	UPROPERTY(EditAnywhere, Category = "1. Config", meta = (ClampMin = "0.0"))
+		float MouseInputThreshold = 0.3f;
+
+	UPROPERTY(EditAnywhere, Category = "1. Config", meta = (ClampMin = "0.0"))
+		float GamepadInputThreshold = 0.3f;
 #pragma endregion
 
 
@@ -105,9 +111,7 @@ private:
 	float ForceMultiplier = 1000000.f;
 	float ImpulseMultiplier = 1000.f;
 
-protected:
-	void MoveRight(float Val);
-	void Jump();
+
 #pragma endregion
 
 
@@ -141,6 +145,7 @@ protected:
 		
 	TArray<class ABlock*> LitSet;
 	void TraceCollision();
+	void SetTracerRotation(const FVector Direction);
 	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef);
 	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef);
 	bool TraceGrounding();
@@ -166,8 +171,17 @@ protected:
 	
 
 #pragma region INPUT
+protected:
+	float InputGamepadRX = 0.f;
+	float InputGamepadRY = 0.f;
+	
+	void MoveRight(float Val);
+	void PointRight(float Val);
+	void PointUp(float Val);
+	void Jump();
+
 	bool QueryMouseInput(class APlayerController* playerController);
-	bool QueryControllerInput(class APlayerController* playerController);
+	bool QueryGamepadInput(class APlayerController* playerController);
 #pragma endregion
 
 
