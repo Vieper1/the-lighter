@@ -42,14 +42,17 @@ public:
 	
 #pragma region CONFIG
 public:
-	UPROPERTY(EditAnywhere, Category = "1. Config")
-		bool ShowDebugTrace = false;
+	UPROPERTY(EditAnywhere, Category = "////////// 1. Config")
+		bool bShowDebugTrace = false;
 
-	UPROPERTY(EditAnywhere, Category = "1. Config", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, Category = "////////// 1. Config", meta = (ClampMin = "0.0"))
 		float MouseInputThreshold = 0.3f;
 
-	UPROPERTY(EditAnywhere, Category = "1. Config", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, Category = "////////// 1. Config", meta = (ClampMin = "0.0"))
 		float GamepadInputThreshold = 0.3f;
+
+	UPROPERTY(EditAnywhere, Category = "////////// 1. Config", meta = (ClampMin = "0.1"))
+		float GravityMultiplier = 1.0f;
 #pragma endregion
 
 
@@ -61,17 +64,23 @@ public:
 	
 	
 #pragma region MODE
-	UPROPERTY(EditAnywhere, Category = "2. Mode")
+	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
+		bool bDisableTracerControl;
+	
+	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
 		bool bDisableMovement;
 
-	UPROPERTY(EditAnywhere, Category = "2. Mode")
+	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
 		bool bDisableAirControl;
 
-	UPROPERTY(EditAnywhere, Category = "2. Mode")
+	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
 		bool bDisableJump;
 
-	UPROPERTY(EditAnywhere, Category = "2. Mode")
+	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
 		bool bDisableExitImpulse;
+
+	UFUNCTION(BlueprintCallable, Category = "////////// 2. Mode")
+		void DetachPlayerBall();
 #pragma endregion
 
 
@@ -84,34 +93,32 @@ public:
 	
 #pragma region MOVEMENT
 public:
-	UPROPERTY(EditAnywhere, Category = "3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
 		float LateralForce;
 	
-	UPROPERTY(EditAnywhere, Category = "3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
 		float RollTorque;
 	
-	UPROPERTY(EditAnywhere, Category = "3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
 		float MaxAngularVelocity = 0.0f;
 
-	UPROPERTY(BlueprintReadOnly, Category = "3. Movement")
+	UPROPERTY(BlueprintReadOnly, Category = "////////// 3. Movement")
 		bool bIsGrounded = false;
 	
-	UPROPERTY(EditAnywhere, Category = "3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
 		float JumpImpulse;
 
-	UPROPERTY(EditAnywhere, Category = "3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
 		float ExitImpulse;
 
-	UFUNCTION(BlueprintCallable, Category = "3. Movement")
+	UFUNCTION(BlueprintCallable, Category = "////////// 3. Movement")
 		void ApplyExitImpulse();
 
 
 private:
-	FRotator LastRotation;
+	FRotator LastTargetRotation;
 	float ForceMultiplier = 1000000.f;
 	float ImpulseMultiplier = 1000.f;
-
-
 #pragma endregion
 
 
@@ -127,28 +134,38 @@ private:
 	
 #pragma region TRACER
 	float TraceAngle = 45.f;
-	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0", ClampMax = "8"))
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0", ClampMax = "8"))
 		int NumberOfTraces = 2;
 
-	UPROPERTY(EditAnywhere, Category = "4. Tracer")
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer")
 		float TraceLength = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0", ClampMax = "30.0"))
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer")
+		float TracerSpeed = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0", ClampMax = "30.0"))
 		float TraceAngleCorrection = 0.0f;
 
-	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
 		float TraceGroundingThreshold = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category = "4. Tracer", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
 		float TraceGroundingSeparation = 1.0f;
 
 		
 	TArray<class ABlock*> LitSet;
 	void TraceCollision();
 	void SetTracerRotation(const FVector Direction);
+	void LerpTracerToTargetRotation(const float DeltaSeconds);
 	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef);
 	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef);
 	bool TraceGrounding();
+
+protected:
+	UPROPERTY(BlueprintReadOnly)
+		FRotator CurrentTracerRotation;
+	UPROPERTY(BlueprintReadOnly)
+		FRotator TargetTracerRotation;
 #pragma endregion
 
 
@@ -160,6 +177,7 @@ private:
 
 
 #pragma region COLLISION
+public:
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 #pragma endregion
 
@@ -182,6 +200,9 @@ protected:
 
 	bool QueryMouseInput(class APlayerController* playerController);
 	bool QueryGamepadInput(class APlayerController* playerController);
+
+private:
+	FVector LastPointerLocation;
 #pragma endregion
 
 

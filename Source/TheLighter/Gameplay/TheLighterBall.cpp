@@ -75,7 +75,7 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
 }
-#pragma endregion
+#pragma endregion INIT
 
 
 
@@ -98,9 +98,12 @@ void ATheLighterBall::BeginPlay()
 		Ball->SetPhysicsMaxAngularVelocityInRadians(MaxAngularVelocity);
 
 	TraceAngle = SpotLight->OuterConeAngle - TraceAngleCorrection;
+	TargetTracerRotation = FRotator(0, 90, 0);
 
-	APlayerController * player0 = GetWorld()->GetFirstPlayerController();
-	if (player0) player0->Possess(this);
+	/*APlayerController * player0 = GetWorld()->GetFirstPlayerController();
+	if (player0) player0->Possess(this);*/
+
+	DrawDebugSphere(GetWorld(), LastPointerLocation, 100.f, 64, FColor::Red);
 }
 
 
@@ -111,16 +114,27 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-
+	// Tracer Control
 	APlayerController * playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!QueryMouseInput(playerController) && !QueryGamepadInput(playerController))
-		SpotLight->SetWorldRotation(LastRotation);
+	if (!bDisableTracerControl)
+	{
+		QueryMouseInput(playerController);
+		QueryGamepadInput(playerController);
+	}
+	LerpTracerToTargetRotation(DeltaSeconds);
+
 
 	
+	// Tracer Toggle Effect
 	TraceCollision();
+
+	// Jump Toggle
 	bIsGrounded = TraceGrounding();
+
+	// Gravity Correction
+	Ball->AddForce(FVector::DownVector * GravityMultiplier);
 }
-#pragma endregion
+#pragma endregion BEGINPLAY & TICK
 
 
 
@@ -159,7 +173,7 @@ void ATheLighterBall::TraceCollision()
 		FHitResult outHit;
 		GetWorld()->LineTraceSingleByChannel(outHit, traceStart, traceEnd, ECollisionChannel::ECC_GameTraceChannel1);
 
-		if (ShowDebugTrace)
+		if (bShowDebugTrace)
 			DrawDebugLine(GetWorld(), traceStart, outHit.bBlockingHit ? outHit.ImpactPoint : traceEnd, FColor::Red);
 
 		if (outHit.bBlockingHit)
@@ -220,7 +234,7 @@ bool ATheLighterBall::TraceGrounding()
 	const FVector rightTraceLocation = GetActorLocation() + (FVector::UpVector * -TraceGroundingThreshold) + (FVector::RightVector * TraceGroundingSeparation);
 	const FVector leftTraceLocation = rightTraceLocation + (FVector::RightVector * -2.f * TraceGroundingSeparation);
 
-	if (ShowDebugTrace)
+	if (bShowDebugTrace)
 	{
 		DrawDebugLine(world, startLocation, rightTraceLocation, FColor::Red);
 		DrawDebugLine(world, startLocation, leftTraceLocation, FColor::Red);
@@ -242,10 +256,18 @@ void ATheLighterBall::SetTracerRotation(const FVector Direction)
 {
 	const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(Direction);
 
-	SpotLight->SetWorldRotation(spotLightRotation);
-	LastRotation = spotLightRotation;
+	//SpotLight->SetWorldRotation(spotLightRotation);
+	TargetTracerRotation = spotLightRotation;
+	LastTargetRotation = spotLightRotation;
 }
-#pragma endregion
+
+void ATheLighterBall::LerpTracerToTargetRotation(const float DeltaSeconds)
+{
+	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
+	const FRotator newRotation = UKismetMathLibrary::RInterpTo(spotLightRotation, TargetTracerRotation, DeltaSeconds, TracerSpeed);
+	SpotLight->SetWorldRotation(FRotator(newRotation.Pitch, newRotation.Yaw, 0));
+}
+#pragma endregion TRACER
 
 
 
@@ -310,11 +332,12 @@ bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 	const bool bMouseQuerySuccess = playerController->DeprojectMousePositionToWorld(mouseLocation, mouseDirection);
 	if (bMouseQuerySuccess)
 	{
-		const float HIT_TEST_DISTANCE = 10000.f;
+		const float HIT_TEST_DISTANCE = SpringArm->TargetArmLength;
 
 		FHitResult hit;
 		GetWorld()->LineTraceSingleByChannel(hit, mouseLocation, mouseLocation + mouseDirection * HIT_TEST_DISTANCE, ECollisionChannel::ECC_Visibility);
-		const FVector mouseWorldLocation = hit.bBlockingHit ? hit.ImpactPoint : hit.TraceEnd;
+		const FVector mouseWorldLocation = hit.TraceEnd;
+		LastPointerLocation = mouseWorldLocation;
 
 		const FVector actorLocation = GetActorLocation();
 		const FVector spotLightDirection = UKismetMathLibrary::GetDirectionUnitVector(FVector(0, actorLocation.Y, actorLocation.Z), FVector(0, mouseWorldLocation.Y, mouseWorldLocation.Z));
@@ -326,8 +349,6 @@ bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 }
 bool ATheLighterBall::QueryGamepadInput(APlayerController* playerController)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::Printf(TEXT("%f %f"), InputGamepadRX, InputGamepadRY));
-	
 	if (fabs(InputGamepadRX) < GamepadInputThreshold && fabs(InputGamepadRY) < GamepadInputThreshold)
 		return false;
 	
@@ -337,7 +358,16 @@ bool ATheLighterBall::QueryGamepadInput(APlayerController* playerController)
 	
 	return true;
 }
-#pragma endregion
+void ATheLighterBall::DetachPlayerBall()
+{
+	bDisableTracerControl = true;
+	bDisableMovement = true;
+	bDisableAirControl = true;
+	bDisableJump = true;
+
+	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+}
+#pragma endregion INPUT
 
 
 
@@ -370,4 +400,4 @@ void ATheLighterBall::ApplyExitImpulse()
 	if (!bDisableExitImpulse)
 		Ball->AddImpulse(ballVelocity.GetSafeNormal() * ExitImpulse * ImpulseMultiplier);
 }
-#pragma endregion
+#pragma endregion COLLISION
