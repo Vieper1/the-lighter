@@ -64,19 +64,19 @@ public:
 	
 	
 #pragma region MODE
-	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "////////// 2. Mode")
 		bool bDisableTracerControl;
 	
-	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "////////// 2. Mode")
 		bool bDisableMovement;
 
-	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "////////// 2. Mode")
 		bool bDisableAirControl;
 
-	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "////////// 2. Mode")
 		bool bDisableJump;
 
-	UPROPERTY(EditAnywhere, Category = "////////// 2. Mode")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "////////// 2. Mode")
 		bool bDisableExitImpulse;
 
 	UFUNCTION(BlueprintCallable, Category = "////////// 2. Mode")
