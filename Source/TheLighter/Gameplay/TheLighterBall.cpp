@@ -174,7 +174,11 @@ void ATheLighterBall::TraceCollision()
 		GetWorld()->LineTraceSingleByChannel(outHit, traceStart, traceEnd, ECollisionChannel::ECC_GameTraceChannel1);
 
 		if (bShowDebugTrace)
-			DrawDebugLine(GetWorld(), traceStart, outHit.bBlockingHit ? outHit.ImpactPoint : traceEnd, FColor::Red);
+			DrawDebugLine(
+				GetWorld(), 
+				traceStart + FVector::BackwardVector * TraceForwardCorrection, 
+				outHit.bBlockingHit ? outHit.ImpactPoint + FVector::BackwardVector * TraceForwardCorrection : traceEnd + FVector::BackwardVector * TraceForwardCorrection,
+				FColor::Red);
 
 		if (outHit.bBlockingHit)
 			SetAdd(hitSet, Cast<ABlock>(outHit.GetActor()));
@@ -236,8 +240,8 @@ bool ATheLighterBall::TraceGrounding()
 
 	if (bShowDebugTrace)
 	{
-		DrawDebugLine(world, startLocation, rightTraceLocation, FColor::Red);
-		DrawDebugLine(world, startLocation, leftTraceLocation, FColor::Red);
+		DrawDebugLine(world, startLocation + FVector::BackwardVector * TraceForwardCorrection, rightTraceLocation + FVector::BackwardVector * TraceForwardCorrection, FColor::Red);
+		DrawDebugLine(world, startLocation + FVector::BackwardVector * TraceForwardCorrection, leftTraceLocation + FVector::BackwardVector * TraceForwardCorrection, FColor::Red);
 	}
 	
 	FHitResult leftHit;
@@ -249,6 +253,35 @@ bool ATheLighterBall::TraceGrounding()
 	if (leftHit.bBlockingHit || rightHit.bBlockingHit)
 		return true;
 	
+	return false;
+}
+
+bool ATheLighterBall::TraceWalling()
+{
+	UWorld* world = GetWorld();
+	const FVector startLocation = GetActorLocation();
+	const FVector rightTraceLocation = GetActorLocation() + (FVector::RightVector * TraceWallingThreshold);
+	const FVector leftTraceLocation = rightTraceLocation + (FVector::RightVector * -2.f * TraceWallingThreshold);
+
+	if (bShowDebugTrace)
+	{
+		DrawDebugLine(world, startLocation + FVector::BackwardVector * TraceForwardCorrection, rightTraceLocation + FVector::BackwardVector * TraceForwardCorrection, FColor::Red);
+		DrawDebugLine(world, startLocation + FVector::BackwardVector * TraceForwardCorrection, leftTraceLocation + FVector::BackwardVector * TraceForwardCorrection, FColor::Red);
+	}
+
+	FHitResult leftHit;
+	world->LineTraceSingleByChannel(leftHit, startLocation, leftTraceLocation, ECC_Visibility);
+
+	FHitResult rightHit;
+	world->LineTraceSingleByChannel(rightHit, startLocation, rightTraceLocation, ECC_Visibility);
+
+	if (leftHit.bBlockingHit || rightHit.bBlockingHit)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("Walling = True"));
+		return true;
+	}
+		
+	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("Walling = False"));
 	return false;
 }
 
@@ -289,7 +322,7 @@ void ATheLighterBall::LerpTracerToTargetRotation(const float DeltaSeconds)
 void ATheLighterBall::MoveRight(float Val)
 {
 	if (bDisableMovement) return;
-	if (!bDisableAirControl && !bIsGrounded)
+	if (!bDisableAirControl && !bIsGrounded && !TraceWalling())
 	{
 		const FVector Force = FVector(0, Val * LateralForce * ForceMultiplier, 0);
 		Ball->AddForce(Force);

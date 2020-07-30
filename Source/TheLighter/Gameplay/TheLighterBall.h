@@ -104,6 +104,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "////////// 3. Movement")
 		bool bIsGrounded = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = "////////// 3. Movement")
+		bool bIsWalled = false;
 	
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
 		float JumpImpulse;
@@ -148,9 +151,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
 		float TraceGroundingThreshold = 1.0f;
+	
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
+		float TraceWallingThreshold = 1.0f;
 
 	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
 		float TraceGroundingSeparation = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
+		float TraceForwardCorrection = 1.0f;
 
 		
 	TArray<class ABlock*> LitSet;
@@ -160,6 +169,7 @@ private:
 	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef);
 	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef);
 	bool TraceGrounding();
+	bool TraceWalling();
 
 protected:
 	UPROPERTY(BlueprintReadOnly)
