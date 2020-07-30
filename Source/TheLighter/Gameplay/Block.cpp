@@ -17,22 +17,6 @@ ABlock::ABlock()
 
 
 
-#pragma region COLLISION
-void ABlock::SetCollisionMode(const ECollisionResponse CollisionResponse)
-{
-	UStaticMeshComponent* meshComp = GetStaticMeshComponent();
-
-	meshComp->SetCollisionResponseToChannel(ECC_Pawn, CollisionResponse);
-	meshComp->SetCollisionResponseToChannel(ECC_PhysicsBody, CollisionResponse);
-
-	CurrentCollisionResponse = CollisionResponse;
-}
-#pragma endregion
-
-
-
-
-
 
 
 
@@ -44,7 +28,7 @@ void ABlock::Tick(float DeltaSeconds)
 
 	TArray<AActor*> overlappingActors;
 	MeshComp->GetOverlappingActors(overlappingActors);
-	if (CurrentCollisionResponse != TargetCollisionResponse && overlappingActors.Num() == 0)
+	if (CurrentCollisionResponse != TargetCollisionResponse && !overlappingActors.Contains(GetWorld()->GetFirstPlayerController()->GetPawn()))
 		SetCollisionMode(TargetCollisionResponse);
 }
 
@@ -56,5 +40,26 @@ void ABlock::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 		ATheLighterBall* playerBall = Cast<ATheLighterBall>(playerPawn);
 		playerBall->ApplyExitImpulse();
 	}
+}
+#pragma endregion
+
+
+
+
+
+
+
+
+
+
+#pragma region COLLISION
+void ABlock::SetCollisionMode(const ECollisionResponse CollisionResponse)
+{
+	UStaticMeshComponent* meshComp = GetStaticMeshComponent();
+
+	meshComp->SetCollisionResponseToChannel(ECC_Pawn, CollisionResponse);
+	meshComp->SetCollisionResponseToChannel(ECC_PhysicsBody, CollisionResponse);
+
+	CurrentCollisionResponse = CollisionResponse;
 }
 #pragma endregion

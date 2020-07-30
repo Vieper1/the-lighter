@@ -93,13 +93,16 @@ public:
 	
 #pragma region MOVEMENT
 public:
-	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
+		float TerminalVelocity;
+	
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float LateralForce;
 	
-	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float RollTorque;
 	
-	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float MaxAngularVelocity = 0.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "////////// 3. Movement")
@@ -108,10 +111,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "////////// 3. Movement")
 		bool bIsWalled = false;
 	
-	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float JumpImpulse;
 
-	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement")
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float ExitImpulse;
 
 	UFUNCTION(BlueprintCallable, Category = "////////// 3. Movement")

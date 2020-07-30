@@ -133,6 +133,8 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 	// Gravity Correction
 	Ball->AddForce(FVector::DownVector * GravityMultiplier);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::Printf(TEXT("Ball Velocity = %f"), Ball->GetPhysicsLinearVelocity().Size()));
 }
 #pragma endregion BEGINPLAY & TICK
 
