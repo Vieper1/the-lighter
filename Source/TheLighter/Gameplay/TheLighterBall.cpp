@@ -276,12 +276,8 @@ bool ATheLighterBall::TraceWalling()
 	world->LineTraceSingleByChannel(rightHit, startLocation, rightTraceLocation, ECC_Visibility);
 
 	if (leftHit.bBlockingHit || rightHit.bBlockingHit)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("Walling = True"));
 		return true;
-	}
 		
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, TEXT("Walling = False"));
 	return false;
 }
 
