@@ -163,7 +163,8 @@ void ATheLighterBall::TraceCollision()
 {
 	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
 	TArray<ABlock*> hitSet;
-	
+
+	// Populate HITSET
 	for (int i = 0; i < NumberOfTraces; i++)
 	{
 		const FRotator lineRotation = UKismetMathLibrary::ComposeRotators(spotLightRotation, FRotator(0, 0, -TraceAngle + (TraceAngle * 2 * i / (NumberOfTraces - 1))));
@@ -183,12 +184,12 @@ void ATheLighterBall::TraceCollision()
 		if (outHit.bBlockingHit)
 			SetAdd(hitSet, Cast<ABlock>(outHit.GetActor()), false);
 	}
-
+	// Populate HITSET
 	
 
 
 
-	
+	// Tracer Algorithm
 	if (LitSet.Num() == 0)
 	{
 		for (ABlock* hitActor : hitSet)
@@ -209,14 +210,7 @@ void ATheLighterBall::TraceCollision()
 			}
 		}
 	}
-
-
-
-
-	// Debugging
-	//GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Orange, TEXT("----------"));
-	//for (ABlock* actor : LitSet)
-	//	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Orange, FString::Printf(TEXT("%s"), *actor->GetName()));
+	// Tracer Algorithm
 }
 
 bool ATheLighterBall::SetAdd(TArray<ABlock*>& arrayRef, ABlock* actorRef, const bool bCollisionToggle)
@@ -439,6 +433,13 @@ void ATheLighterBall::ApplyExitImpulse()
 {
 	const FVector ballVelocity = GetVelocity();
 	if (!bDisableExitImpulse)
-		Ball->AddImpulse(ballVelocity.GetSafeNormal() * ExitImpulse * ImpulseMultiplier);
+		Ball->AddImpulse(SpotLight->GetForwardVector() * -1 * ExitImpulse * ImpulseMultiplier);
+		
+
+	
+	if (ballVelocity.Size() > MaxExitVelocity)
+		Ball->SetPhysicsLinearVelocity(ballVelocity.GetSafeNormal() * MaxExitVelocity);
+
+	
 }
 #pragma endregion COLLISION

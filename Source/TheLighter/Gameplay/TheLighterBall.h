@@ -94,9 +94,6 @@ public:
 #pragma region MOVEMENT
 public:
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
-		float TerminalVelocity;
-	
-	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float LateralForce;
 	
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
@@ -116,6 +113,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float ExitImpulse;
+
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
+		float MaxExitVelocity;
 
 	UFUNCTION(BlueprintCallable, Category = "////////// 3. Movement")
 		void ApplyExitImpulse();
