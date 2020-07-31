@@ -169,8 +169,8 @@ private:
 	void TraceCollision();
 	void SetTracerRotation(const FVector Direction);
 	void LerpTracerToTargetRotation(const float DeltaSeconds);
-	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef);
-	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef);
+	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef, const bool bCollisionToggle);
+	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef, const bool bCollisionToggle);
 	bool TraceGrounding();
 	bool TraceWalling();
 

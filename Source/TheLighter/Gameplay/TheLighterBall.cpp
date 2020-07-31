@@ -133,8 +133,6 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 	// Gravity Correction
 	Ball->AddForce(FVector::DownVector * GravityMultiplier);
-
-	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Red, FString::Printf(TEXT("Ball Velocity = %f"), Ball->GetPhysicsLinearVelocity().Size()));
 }
 #pragma endregion BEGINPLAY & TICK
 
@@ -183,14 +181,18 @@ void ATheLighterBall::TraceCollision()
 				FColor::Red);
 
 		if (outHit.bBlockingHit)
-			SetAdd(hitSet, Cast<ABlock>(outHit.GetActor()));
+			SetAdd(hitSet, Cast<ABlock>(outHit.GetActor()), false);
 	}
 
+	
 
+
+
+	
 	if (LitSet.Num() == 0)
 	{
 		for (ABlock* hitActor : hitSet)
-			SetAdd(LitSet, hitActor);
+			SetAdd(LitSet, hitActor, true);
 	}
 	else
 	{
@@ -198,22 +200,30 @@ void ATheLighterBall::TraceCollision()
 		{
 			if (!hitSet.Contains(LitSet[i]))
 			{
-				SetRemove(LitSet, LitSet[i]);
+				SetRemove(LitSet, LitSet[i], true);
 				continue;
 			}
 			for (ABlock* hitActor : hitSet)
 			{
-				SetAdd(LitSet, hitActor);
+				SetAdd(LitSet, hitActor, true);
 			}
 		}
 	}
+
+
+
+
+	// Debugging
+	//GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Orange, TEXT("----------"));
+	//for (ABlock* actor : LitSet)
+	//	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Orange, FString::Printf(TEXT("%s"), *actor->GetName()));
 }
 
-bool ATheLighterBall::SetAdd(TArray<ABlock*>& arrayRef, ABlock* actorRef)
+bool ATheLighterBall::SetAdd(TArray<ABlock*>& arrayRef, ABlock* actorRef, const bool bCollisionToggle)
 {
 	if (!arrayRef.Contains(actorRef))
 	{
-		if (actorRef->TargetCollisionResponse != ECR_Block)
+		if (bCollisionToggle && actorRef->TargetCollisionResponse != ECR_Block)
 			actorRef->TargetCollisionResponse = ECR_Block;
 		arrayRef.Add(actorRef);
 		return true;
@@ -221,11 +231,11 @@ bool ATheLighterBall::SetAdd(TArray<ABlock*>& arrayRef, ABlock* actorRef)
 	return false;
 }
 
-bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef)
+bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef, const bool bCollisionToggle)
 {
 	if (arrayRef.Contains(actorRef))
 	{
-		if (actorRef->TargetCollisionResponse != ECR_Overlap)
+		if (bCollisionToggle && actorRef->TargetCollisionResponse != ECR_Overlap)
 			actorRef->TargetCollisionResponse = ECR_Overlap;
 		arrayRef.Remove(actorRef);
 		return true;

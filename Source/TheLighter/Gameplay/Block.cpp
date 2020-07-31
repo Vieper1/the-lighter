@@ -30,6 +30,9 @@ void ABlock::Tick(float DeltaSeconds)
 	MeshComp->GetOverlappingActors(overlappingActors);
 	if (CurrentCollisionResponse != TargetCollisionResponse && !overlappingActors.Contains(GetWorld()->GetFirstPlayerController()->GetPawn()))
 		SetCollisionMode(TargetCollisionResponse);
+
+
+	GEngine->AddOnScreenDebugMessage(-1, 0, FColor::Cyan, FString::Printf(TEXT("%d"), TargetCollisionResponse));
 }
 
 void ABlock::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
