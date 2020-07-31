@@ -432,14 +432,15 @@ void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor*
 void ATheLighterBall::ApplyExitImpulse()
 {
 	const FVector ballVelocity = GetVelocity();
-	if (!bDisableExitImpulse)
-		Ball->AddImpulse(SpotLight->GetForwardVector() * -1 * ExitImpulse * ImpulseMultiplier);
+	const FVector spotLightDirection = SpotLight->GetForwardVector() * -1;
+	const float angle = FMath::Acos(FVector::DotProduct(ballVelocity.GetSafeNormal(), spotLightDirection));
+
+	if (!bDisableExitImpulse && angle < 1.57f)
+		Ball->AddImpulse(spotLightDirection * ExitImpulse * ImpulseMultiplier);
 		
 
 	
 	if (ballVelocity.Size() > MaxExitVelocity)
 		Ball->SetPhysicsLinearVelocity(ballVelocity.GetSafeNormal() * MaxExitVelocity);
-
-	
 }
 #pragma endregion COLLISION
