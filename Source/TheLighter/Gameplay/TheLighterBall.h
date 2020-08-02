@@ -8,6 +8,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoubleJumpDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExitImpulseDelegate);
 
 
 
@@ -186,6 +187,9 @@ protected:
 	float GroundedTime = 0.0f;
 	UPROPERTY(BlueprintAssignable, Category = "Test")
 		FDoubleJumpDelegate OnDoubleJump;
+
+	UPROPERTY(BlueprintAssignable, Category = "Test")
+		FExitImpulseDelegate OnExitImpulse;
 	
 	UPROPERTY(BlueprintReadOnly)
 		FRotator CurrentTracerRotation;

@@ -465,5 +465,7 @@ void ATheLighterBall::ApplyExitImpulse()
 	
 	if (ballVelocity.Size() > MaxExitVelocity)
 		Ball->SetPhysicsLinearVelocity(ballVelocity.GetSafeNormal() * MaxExitVelocity);
+
+	OnExitImpulse.Broadcast();
 }
 #pragma endregion COLLISION
