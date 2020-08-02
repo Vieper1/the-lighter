@@ -133,6 +133,12 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 	// Gravity Correction
 	Ball->AddForce(FVector::DownVector * GravityMultiplier);
+
+	// Double Jump Logic
+	if (bIsGrounded)
+		GroundedTime += DeltaSeconds;
+	else
+		GroundedTime = 0.0f;
 }
 #pragma endregion BEGINPLAY & TICK
 
@@ -350,6 +356,9 @@ void ATheLighterBall::Jump()
 	{
 		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
 		Ball->AddImpulse(Impulse);
+
+		if (GroundedTime < DoubleJumpThreshold)
+			OnDoubleJump.Broadcast();
 	}
 }
 
