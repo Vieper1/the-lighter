@@ -327,6 +327,20 @@ void ATheLighterBall::LerpTracerToTargetRotation(const float DeltaSeconds)
 
 
 #pragma region INPUT
+void ATheLighterBall::DisablePlayerInput()
+{
+	bDisableMovement = true;
+	bDisableJump = true;
+	bDisableTracerControl = true;
+}
+
+void ATheLighterBall::EnablePlayerInput()
+{
+	bDisableMovement = false;
+	bDisableJump = false;
+	bDisableTracerControl = false;
+}
+
 void ATheLighterBall::MoveRight(float Val)
 {
 	if (bDisableMovement) return;

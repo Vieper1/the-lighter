@@ -214,6 +214,11 @@ public:
 	
 
 #pragma region INPUT
+public:
+	UFUNCTION(BlueprintCallable, Category = "Input")
+		void DisablePlayerInput();
+	UFUNCTION(BlueprintCallable, Category = "Input")
+		void EnablePlayerInput();
 protected:
 	float InputGamepadRX = 0.f;
 	float InputGamepadRY = 0.f;
