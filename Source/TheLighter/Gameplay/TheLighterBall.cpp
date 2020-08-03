@@ -133,6 +133,12 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 	// Gravity Correction
 	Ball->AddForce(FVector::DownVector * GravityMultiplier);
+
+	// Double Jump Logic
+	if (bIsGrounded)
+		GroundedTime += DeltaSeconds;
+	else
+		GroundedTime = 0.0f;
 }
 #pragma endregion BEGINPLAY & TICK
 
@@ -321,6 +327,20 @@ void ATheLighterBall::LerpTracerToTargetRotation(const float DeltaSeconds)
 
 
 #pragma region INPUT
+void ATheLighterBall::DisablePlayerInput()
+{
+	bDisableMovement = true;
+	bDisableJump = true;
+	bDisableTracerControl = true;
+}
+
+void ATheLighterBall::EnablePlayerInput()
+{
+	bDisableMovement = false;
+	bDisableJump = false;
+	bDisableTracerControl = false;
+}
+
 void ATheLighterBall::MoveRight(float Val)
 {
 	if (bDisableMovement) return;
@@ -350,6 +370,9 @@ void ATheLighterBall::Jump()
 	{
 		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
 		Ball->AddImpulse(Impulse);
+
+		if (GroundedTime < DoubleJumpThreshold)
+			OnDoubleJump.Broadcast();
 	}
 }
 
@@ -442,5 +465,7 @@ void ATheLighterBall::ApplyExitImpulse()
 	
 	if (ballVelocity.Size() > MaxExitVelocity)
 		Ball->SetPhysicsLinearVelocity(ballVelocity.GetSafeNormal() * MaxExitVelocity);
+
+	OnExitImpulse.Broadcast();
 }
 #pragma endregion COLLISION

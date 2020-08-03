@@ -6,6 +6,12 @@
 #include "GameFramework/Pawn.h"
 #include "TheLighterBall.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoubleJumpDelegate);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExitImpulseDelegate);
+
+
+
 UCLASS(config=Game)
 class ATheLighterBall : public APawn
 {
@@ -117,6 +123,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float MaxExitVelocity;
 
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
+		float DoubleJumpThreshold = 1.0f;
+
 	UFUNCTION(BlueprintCallable, Category = "////////// 3. Movement")
 		void ApplyExitImpulse();
 
@@ -153,10 +162,10 @@ private:
 		float TraceAngleCorrection = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
-		float TraceGroundingThreshold = 1.0f;
-	
-	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
 		float TraceWallingThreshold = 1.0f;
+
+	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
+		float TraceGroundingThreshold = 1.0f;
 
 	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
 		float TraceGroundingSeparation = 1.0f;
@@ -175,6 +184,13 @@ private:
 	bool TraceWalling();
 
 protected:
+	float GroundedTime = 0.0f;
+	UPROPERTY(BlueprintAssignable, Category = "Test")
+		FDoubleJumpDelegate OnDoubleJump;
+
+	UPROPERTY(BlueprintAssignable, Category = "Test")
+		FExitImpulseDelegate OnExitImpulse;
+	
 	UPROPERTY(BlueprintReadOnly)
 		FRotator CurrentTracerRotation;
 	UPROPERTY(BlueprintReadOnly)
@@ -202,6 +218,11 @@ public:
 	
 
 #pragma region INPUT
+public:
+	UFUNCTION(BlueprintCallable, Category = "Input")
+		void DisablePlayerInput();
+	UFUNCTION(BlueprintCallable, Category = "Input")
+		void EnablePlayerInput();
 protected:
 	float InputGamepadRX = 0.f;
 	float InputGamepadRY = 0.f;
@@ -210,6 +231,8 @@ protected:
 	void PointRight(float Val);
 	void PointUp(float Val);
 	void Jump();
+
+	
 
 	bool QueryMouseInput(class APlayerController* playerController);
 	bool QueryGamepadInput(class APlayerController* playerController);
