@@ -366,12 +366,14 @@ void ATheLighterBall::PointUp(float Val)
 void ATheLighterBall::Jump()
 {
 	if (bDisableMovement || bDisableJump) return;
+
+	
 	if (bIsGrounded)
 	{
 		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
 		Ball->AddImpulse(Impulse);
 
-		if (GroundedTime < DoubleJumpThreshold)
+		if (GroundedTime < DoubleJumpThreshold && FVector::DotProduct(GetVelocity().GetSafeNormal(), FVector::UpVector) > 0)
 			OnDoubleJump.Broadcast();
 	}
 }
