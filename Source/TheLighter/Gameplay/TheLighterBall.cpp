@@ -460,8 +460,8 @@ void ATheLighterBall::ApplyExitImpulse()
 	const FVector spotLightDirection = SpotLight->GetForwardVector() * -1;
 	const float angle = FMath::Acos(FVector::DotProduct(ballVelocity.GetSafeNormal(), spotLightDirection));
 
-	if (!bDisableExitImpulse && angle < 1.57f)
-		Ball->AddImpulse(spotLightDirection * ExitImpulse * ImpulseMultiplier);
+	//if (!bDisableExitImpulse && angle < 1.57f)
+	Ball->AddImpulse(spotLightDirection * ExitImpulse * ImpulseMultiplier);
 		
 
 	

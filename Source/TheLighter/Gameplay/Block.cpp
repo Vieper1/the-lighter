@@ -34,7 +34,13 @@ void ABlock::Tick(float DeltaSeconds)
 
 void ABlock::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	APawn* playerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
+	UWorld* world = GetWorld();
+	if (!world) return;
+
+	APlayerController* playerController = world->GetFirstPlayerController();
+	if (!playerController) return;
+
+	APawn* playerPawn = playerController->GetPawn();
 	if (playerPawn && OtherActor == playerPawn)
 	{
 		ATheLighterBall* playerBall = Cast<ATheLighterBall>(playerPawn);
