@@ -10,6 +10,14 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoubleJumpDelegate);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FExitImpulseDelegate);
 
+UENUM()
+enum WallingDirection
+{
+	Left,
+	Right,
+	Both,
+	None
+};
 
 
 UCLASS(config=Game)
@@ -181,7 +189,7 @@ private:
 	inline bool SetAdd(TArray<ABlock*> &arrayRef, class ABlock * actorRef, const bool bCollisionToggle);
 	inline bool SetRemove(TArray<ABlock*>& arrayRef, class ABlock * actorRef, const bool bCollisionToggle);
 	bool TraceGrounding();
-	bool TraceWalling();
+	WallingDirection TraceWalling();
 
 protected:
 	float GroundedTime = 0.0f;

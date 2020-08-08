@@ -268,7 +268,7 @@ bool ATheLighterBall::TraceGrounding()
 	return false;
 }
 
-bool ATheLighterBall::TraceWalling()
+WallingDirection ATheLighterBall::TraceWalling()
 {
 	UWorld* world = GetWorld();
 	const FVector startLocation = GetActorLocation();
@@ -287,10 +287,14 @@ bool ATheLighterBall::TraceWalling()
 	FHitResult rightHit;
 	world->LineTraceSingleByChannel(rightHit, startLocation, rightTraceLocation, ECC_Visibility);
 
-	if (leftHit.bBlockingHit || rightHit.bBlockingHit)
-		return true;
+	if (leftHit.bBlockingHit && rightHit.bBlockingHit)
+		return WallingDirection::Both;
+	else if (leftHit.bBlockingHit)
+		return WallingDirection::Left;
+	else if (rightHit.bBlockingHit)
+		return WallingDirection::Right;
 		
-	return false;
+	return WallingDirection::None;
 }
 
 void ATheLighterBall::SetTracerRotation(const FVector Direction)
@@ -344,8 +348,12 @@ void ATheLighterBall::EnablePlayerInput()
 void ATheLighterBall::MoveRight(float Val)
 {
 	if (bDisableMovement) return;
-	if (!bDisableAirControl && !bIsGrounded && !TraceWalling())
+	if (!bDisableAirControl && !bIsGrounded)
 	{
+		WallingDirection currentWallingDirection = TraceWalling();
+		if (currentWallingDirection == WallingDirection::Right && Val > 0) return;
+		if (currentWallingDirection == WallingDirection::Left && Val < 0) return;
+		
 		const FVector Force = FVector(0, Val * LateralForce * ForceMultiplier, 0);
 		Ball->AddForce(Force);
 	}
