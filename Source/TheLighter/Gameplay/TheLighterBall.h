@@ -128,6 +128,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float ExitImpulse;
 
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+		float ExitImpulseRatio;
+
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float MaxExitVelocity;
 
