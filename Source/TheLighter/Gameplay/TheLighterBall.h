@@ -121,9 +121,12 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "////////// 3. Movement")
 		bool bIsWalled = false;
-	
+
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
-		float JumpImpulse;
+		float BaseJumpVelocity;
+
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
+		float DoubleJumpVelocity;
 
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float ExitImpulse;
@@ -134,7 +137,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float MaxExitVelocity;
 
-	UPROPERTY(EditAnywhere, Category = "////////// 4. Tracer", meta = (ClampMin = "0.0"))
+	UPROPERTY(EditAnywhere, Category = "////////// 3. Movement", meta = (ClampMin = "0.0"))
 		float DoubleJumpThreshold = 1.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "////////// 3. Movement")

@@ -63,7 +63,6 @@ ATheLighterBall::ATheLighterBall()
 	
 	// Set up forces
 	RollTorque = 50.f;
-	JumpImpulse = 350.f;
 }
 
 void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -348,17 +347,12 @@ void ATheLighterBall::EnablePlayerInput()
 void ATheLighterBall::MoveRight(float Val)
 {
 	if (bDisableMovement) return;
-	if (!bDisableAirControl && !bIsGrounded)
-	{
-		WallingDirection currentWallingDirection = TraceWalling();
-		if (currentWallingDirection == WallingDirection::Right && Val > 0) return;
-		if (currentWallingDirection == WallingDirection::Left && Val < 0) return;
-		
-		const FVector Force = FVector(0, Val * LateralForce * ForceMultiplier, 0);
+
+	const FVector Force = FVector(0, Val * LateralForce * ForceMultiplier, 0);
+	if (bIsGrounded)
 		Ball->AddForce(Force);
-	}
-	const FVector Torque = FVector(-1.f * Val * RollTorque * ForceMultiplier, 0.f, 0.f);
-	Ball->AddTorqueInRadians(Torque);
+	else
+		Ball->AddForce(bDisableAirControl ? FVector::ZeroVector : Force);
 }
 
 void ATheLighterBall::PointRight(float Val)
@@ -378,11 +372,14 @@ void ATheLighterBall::Jump()
 	
 	if (bIsGrounded)
 	{
-		const FVector Impulse = FVector(0.f, 0.f, JumpImpulse * ImpulseMultiplier);
-		Ball->AddImpulse(Impulse);
-
-		if (GroundedTime < DoubleJumpThreshold && FVector::DotProduct(GetVelocity().GetSafeNormal(), FVector::UpVector) > 0)
+		const FVector ballVelocity = GetVelocity();
+		if (GroundedTime < DoubleJumpThreshold)
+		{
+			Ball->SetPhysicsLinearVelocity(FVector(ballVelocity.X, ballVelocity.Y, DoubleJumpVelocity));
 			OnDoubleJump.Broadcast();
+		}
+		else
+			Ball->SetPhysicsLinearVelocity(FVector(ballVelocity.X, ballVelocity.Y, BaseJumpVelocity));
 	}
 }
 
