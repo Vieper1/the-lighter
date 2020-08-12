@@ -451,7 +451,7 @@ void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor*
 {
 	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
 }
-#pragma endregion
+#pragma endregion COLLISION
 
 
 
@@ -479,4 +479,4 @@ void ATheLighterBall::ApplyExitImpulse()
 
 	OnExitImpulse.Broadcast();
 }
-#pragma endregion COLLISION
+#pragma endregion MOVEMENT
