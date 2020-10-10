@@ -1,4 +1,5 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Created by Vishal Naidu (GitHub: Vieper1) naiduvishal13@gmail.com | Vishal.Naidu@utah.edu
+// Extending Unreal's Pawn class to gain PlayerControl features
 
 #include "TheLighterBall.h"
 #include "UObject/ConstructorHelpers.h"
@@ -16,6 +17,7 @@
 
 
 
+////////////////////////////////////////////////////////////////////// CORE
 #pragma region INIT
 ATheLighterBall::ATheLighterBall()
 {
@@ -75,6 +77,7 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ATheLighterBall::Jump);
 }
 #pragma endregion INIT
+////////////////////////////////////////////////////////////////////// CORE
 
 
 
@@ -87,6 +90,8 @@ void ATheLighterBall::SetupPlayerInputComponent(class UInputComponent* PlayerInp
 
 
 
+
+////////////////////////////////////////////////////////////////////// EVENTS
 #pragma region BEGINPLAY & TICK
 void ATheLighterBall::BeginPlay()
 {
@@ -96,11 +101,9 @@ void ATheLighterBall::BeginPlay()
 	if (MaxAngularVelocity > 0.f)
 		Ball->SetPhysicsMaxAngularVelocityInRadians(MaxAngularVelocity);
 
+	// Set Tracer cone angle on play start
 	TraceAngle = SpotLight->OuterConeAngle - TraceAngleCorrection;
 	TargetTracerRotation = FRotator(0, 90, 0);
-
-	/*APlayerController * player0 = GetWorld()->GetFirstPlayerController();
-	if (player0) player0->Possess(this);*/
 
 	DrawDebugSphere(GetWorld(), LastPointerLocation, 100.f, 64, FColor::Red);
 }
@@ -113,19 +116,21 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Tracer Control
+	// Query for Tracer Control
 	APlayerController * playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!bDisableTracerControl)
 	{
 		QueryMouseInput(playerController);
 		QueryGamepadInput(playerController);
 	}
+
+	// Use SMOOTH interpolation to rotate the flashlight
 	LerpTracerToTargetRotation(DeltaSeconds);
 
 
-	
-	// Tracer Toggle Effect
+	// Invoke the TRACER-ALGORITHM
 	TraceCollision();
+
 
 	// Jump Toggle
 	bIsGrounded = TraceGrounding();
@@ -140,6 +145,7 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 		GroundedTime = 0.0f;
 }
 #pragma endregion BEGINPLAY & TICK
+////////////////////////////////////////////////////////////////////// EVENTS
 
 
 
@@ -158,18 +164,66 @@ void ATheLighterBall::Tick(float DeltaSeconds)
 
 
 
+// Tracer
+
+/* 
+*			+-----------------------+
+* 			| 	  THE TECHNIQUE		|
+* 			+-----------------------+
+* 
+* 1. Since there are multiple line traces (which reduces trace misses), we'd need to add an 
+*  	 EXTRA DATA STRUCTURE to handle how many LighterBlocks we've hit in one group trace
+* 	 It's called the "HITSET"
+* 
+* 2. HitSet in turn controls what objects we have in a list that contains the actual LIT ITEMS
+* 	 It's called the "LITSET"
+* 
+* 3. We need the LitSet because we need to toggle the collisions on the LigterBlocks ONLY ONCE
+* 
+* 
+* NOTE: 	HitSet	=> It is PER-LINE sensitive
+* 			LitSet	=> It is PER-FRAME sensitive
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* 
+* Algorithm
+* ---------
+* 1. Trace out N lines along your SpotLight's Cone
+* 
+* 2. If you hit a LighterBlock on any of the traces
+* 		a. Call the ToggleCollision function on it to enable collision
+* 		b. Add it to the list of Lit Items
+* 
+* 3. If all of your traces fail to find the LighterBlock
+* 		a. Call the ToggleCollision again to disable collision
+* 		b. Remove it from the list
+* 
+* 
+* NOTE: The ToggleCollision function only sets the target collision,
+* 		But the real collision change occurs when NOTHING's overlapping the LighterBlock
+*/
 
 
 
 
 
+////////////////////////////////////////////////////////////////////// TRACER
 #pragma region TRACER
 void ATheLighterBall::TraceCollision()
 {
 	const FRotator spotLightRotation = SpotLight->GetComponentRotation();
 	TArray<ABlock*> hitSet;
 
-	// Populate HITSET
+	
+	// EVENLY ANGLED LINE TRACES
+	// To populate the HITSET
+
 	for (int i = 0; i < NumberOfTraces; i++)
 	{
 		const FRotator lineRotation = UKismetMathLibrary::ComposeRotators(spotLightRotation, FRotator(0, 0, -TraceAngle + (TraceAngle * 2 * i / (NumberOfTraces - 1))));
@@ -242,6 +296,17 @@ bool ATheLighterBall::SetRemove(TArray<ABlock*>& arrayRef, ABlock* actorRef, con
 	return false;
 }
 
+
+
+
+
+
+
+// Wrote my own IsOnGround toggle
+
+// This trace tells us if the PlayerBall is allowed to jump
+// PREVENTS the JUMP-SKIP when the PlayerBall is on a SLOPE while MOVING FAST
+
 bool ATheLighterBall::TraceGrounding()
 {
 	UWorld* world = GetWorld();
@@ -266,6 +331,17 @@ bool ATheLighterBall::TraceGrounding()
 	
 	return false;
 }
+
+
+
+
+
+
+
+
+
+// This is a separate trace just to tell if we're close to the walls
+// Useful to PREVENT WALL CLIMB since we're applying LATERAL FORCES
 
 WallingDirection ATheLighterBall::TraceWalling()
 {
@@ -296,6 +372,8 @@ WallingDirection ATheLighterBall::TraceWalling()
 	return WallingDirection::None;
 }
 
+
+// Set tracer rotation smoothly
 void ATheLighterBall::SetTracerRotation(const FVector Direction)
 {
 	const FRotator spotLightRotation = UKismetMathLibrary::MakeRotFromX(Direction);
@@ -312,6 +390,7 @@ void ATheLighterBall::LerpTracerToTargetRotation(const float DeltaSeconds)
 	SpotLight->SetWorldRotation(FRotator(newRotation.Pitch, newRotation.Yaw, 0));
 }
 #pragma endregion TRACER
+////////////////////////////////////////////////////////////////////// TRACER
 
 
 
@@ -329,7 +408,14 @@ void ATheLighterBall::LerpTracerToTargetRotation(const float DeltaSeconds)
 
 
 
-#pragma region INPUT
+
+
+
+////////////////////////////////////////////////////////////////////// INPUTS & MOVEMENT
+#pragma region INPUTS AND MOVEMENT
+
+
+////////////////////////////////////////////////// Input Toggles
 void ATheLighterBall::DisablePlayerInput()
 {
 	bDisableMovement = true;
@@ -343,7 +429,14 @@ void ATheLighterBall::EnablePlayerInput()
 	bDisableJump = false;
 	bDisableTracerControl = false;
 }
+////////////////////////////////////////////////// Input Toggles
 
+
+
+
+
+
+////////////////////////////////////////////////// Ball Movement Control
 void ATheLighterBall::MoveRight(float Val)
 {
 	if (bDisableMovement) return;
@@ -353,16 +446,6 @@ void ATheLighterBall::MoveRight(float Val)
 		Ball->AddForce(Force);
 	else
 		Ball->AddForce(bDisableAirControl ? FVector::ZeroVector : Force);
-}
-
-void ATheLighterBall::PointRight(float Val)
-{
-	InputGamepadRX = Val;
-}
-
-void ATheLighterBall::PointUp(float Val)
-{
-	InputGamepadRY = Val;
 }
 
 void ATheLighterBall::Jump()
@@ -382,7 +465,31 @@ void ATheLighterBall::Jump()
 			Ball->SetPhysicsLinearVelocity(FVector(ballVelocity.X, ballVelocity.Y, BaseJumpVelocity));
 	}
 }
+////////////////////////////////////////////////// Ball Movement Control
 
+
+
+
+
+
+
+////////////////////////////////////////////////// Tracer Control
+
+/*
+* Manually querying MOUSE and GAMEPAD
+* for input gives us more control over how to switch between the two
+*
+* This FIXES the problem of the FLASHLIGHT FLICKING AROUND
+* when players have both connected
+*/
+
+
+
+
+// MANUAL QUERY (Tick)
+// To check where the mouse is currently
+// Use the relative location to provide a LOOK ANGLE
+// For the flashlight
 
 bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 {
@@ -412,6 +519,26 @@ bool ATheLighterBall::QueryMouseInput(APlayerController* playerController)
 	}
 	return false;
 }
+
+
+
+
+
+/*
+* Use a 2-LAYER-BUFFER for gamepad inputs
+*
+* To help SEPARATE the inputs coming from mouse & gamepad
+*/
+
+
+// MANUAL QUERY (Tick)
+// Query any GamePads for input
+// Feed the right stick direction to the inputs
+
+void ATheLighterBall::PointRight(float Val) { InputGamepadRX = Val; }
+void ATheLighterBall::PointUp(float Val) { InputGamepadRY = Val; }
+
+
 bool ATheLighterBall::QueryGamepadInput(APlayerController* playerController)
 {
 	if (fabs(InputGamepadRX) < GamepadInputThreshold && fabs(InputGamepadRY) < GamepadInputThreshold)
@@ -432,7 +559,7 @@ void ATheLighterBall::DetachPlayerBall()
 
 	GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 }
-#pragma endregion INPUT
+////////////////////////////////////////////////// Tracer Control
 
 
 
@@ -441,24 +568,7 @@ void ATheLighterBall::DetachPlayerBall()
 
 
 
-
-
-
-
-
-#pragma region COLLISION
-void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
-{
-	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
-}
-#pragma endregion COLLISION
-
-
-
-
-
-
-#pragma region MOVEMENT
+////////////////////////////////////////////////// Exit Impulse
 void ATheLighterBall::ApplyExitImpulse()
 {
 	const FVector ballVelocity = GetVelocity();
@@ -479,4 +589,33 @@ void ATheLighterBall::ApplyExitImpulse()
 
 	OnExitImpulse.Broadcast();
 }
-#pragma endregion MOVEMENT
+////////////////////////////////////////////////// Exit Impulse
+
+
+
+#pragma endregion INPUTS AND MOVEMENT
+////////////////////////////////////////////////////////////////////// INPUTS & MOVEMENT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////// COLLISION
+#pragma region COLLISION
+void ATheLighterBall::NotifyHit(class UPrimitiveComponent* MyComp, class AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation, HitNormal, NormalImpulse, Hit);
+}
+#pragma endregion COLLISION
+////////////////////////////////////////////////////////////////////// COLLISION

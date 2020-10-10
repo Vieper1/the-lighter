@@ -1,4 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Created by Vishal Naidu (GitHub: Vieper1) naiduvishal13@gmail.com | Vishal.Naidu@utah.edu
+// Extended from the Standard Actor Template
 
 
 #include "Block.h"
@@ -26,6 +27,9 @@ void ABlock::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	// Don't update the collision preset
+	// Until the PlayerBall exits the collider
+
 	TArray<AActor*> overlappingActors;
 	MeshComp->GetOverlappingActors(overlappingActors);
 	if (CurrentCollisionResponse != TargetCollisionResponse && !overlappingActors.Contains(GetWorld()->GetFirstPlayerController()->GetPawn()))
@@ -43,6 +47,11 @@ void ABlock::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 	APawn* playerPawn = playerController->GetPawn();
 	if (playerPawn && OtherActor == playerPawn)
 	{
+
+		// Apply an Impulse to the PlayerBall after it exits
+		// This allows us to do the HotWheels-Booster effect on the ball
+		// When it passes through a series of LighterBlocks placed close to each other
+
 		ATheLighterBall* playerBall = Cast<ATheLighterBall>(playerPawn);
 		playerBall->ApplyExitImpulse();
 	}

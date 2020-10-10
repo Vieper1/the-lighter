@@ -1,4 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Created by Vishal Naidu (GitHub: Vieper1) naiduvishal13@gmail.com | Vishal.Naidu@utah.edu
+// Extended from the Standard Actor template
 
 #pragma once
 
@@ -17,6 +18,8 @@ class ABlock : public AStaticMeshActor
 #pragma region CORE
 public:
 	ABlock();
+
+	// The Cubes we're going to be using as the LighterBlocks
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 		class UStaticMeshComponent* MeshComp;
 #pragma endregion
@@ -26,12 +29,16 @@ public:
 	
 #pragma region COLLISION
 private:
+
+	// This function is used to provide a LateUpdate to the LighterBlock's collision preset
 	ECollisionResponse CurrentCollisionResponse;
 	void SetCollisionMode(const ECollisionResponse CollisionResponse);
 	
 public:
+	// This is the collision preset we want
 	ECollisionResponse TargetCollisionResponse;
 
+	// Overriding the EndOverlap so we could update the collision preset after the ball exits
 	UFUNCTION()
 		void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 #pragma endregion
@@ -41,7 +48,6 @@ public:
 	
 #pragma region EVENTS
 public:
-	
 	virtual void Tick(float DeltaSeconds) override;
 #pragma endregion
 };
