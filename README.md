@@ -1,9 +1,10 @@
 # THE LIGHTER
-Started with the game idea: <b>What you don't see is not real
+Started with the game idea: <b>What you don't see is not real</b>
 
 
-It's a 2.5D game where you play as Lumino, the ball with the magical flashlight </br>
-Anything you can't see without the flashlight only exists when it's lit by it
+### Story Cover & Play
+&nbsp; &nbsp; &nbsp; &nbsp; It's a 2.5D game where you play as Lumino, the ball with the magical flashlight </br>
+&nbsp; &nbsp; &nbsp; &nbsp; Anything you can't see without the flashlight only exists when it's lit by it
 
 </br>
 
