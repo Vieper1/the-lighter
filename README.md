@@ -1,10 +1,10 @@
 # THE LIGHTER
 Started with the game idea: <b>What you don't see is not real!
 
-#### Story Cover & Play
+#### Story Cover and Play
 
-It's a 2.5D game where you play as Lumino, the ball with the magical flashlight </br>
-Anything you can't see without the flashlight only exists when it's lit by it
+&nbsp;&nbsp;&nbsp;&nbsp; It's a 2.5D game where you play as Lumino, the ball with the magical flashlight </br>
+&nbsp;&nbsp;&nbsp;&nbsp; Anything you can't see without the flashlight only exists when it's lit by it
 
 </br>
 
@@ -14,7 +14,7 @@ Anything you can't see without the flashlight only exists when it's lit by it
 
 </br>
 
-### This mechanic allows for some <b>real cool physics-based level designs</b>
+## This mechanic allows for some <b>real cool physics-based level designs</b>
 
 (LighterBlocks in <b>1-DIMENSION</b>. I call it the <b>LighterStairs</b>)</br>
 ![Gameplay 2](StairsTesting.gif)
